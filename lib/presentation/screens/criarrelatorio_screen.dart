@@ -7,10 +7,10 @@ class CriarRelatorioScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Criar Relatório'),
+        title: const Text('Criar Relatório'),
         centerTitle: true,
       ),
-      body: Center(
+      body: const Center(
         child: Text(
           'Página para criar relatório',
           style: TextStyle(fontSize: 18),

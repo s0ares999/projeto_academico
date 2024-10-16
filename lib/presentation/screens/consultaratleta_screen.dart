@@ -7,10 +7,10 @@ class ConsultarAtletaScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Consultar Atletas'),
+        title: const Text('Consultar Atletas'),
         centerTitle: true,
       ),
-      body: Center(
+      body: const Center(
         child: Text(
           'Página para consultar atletas',
           style: TextStyle(fontSize: 18),

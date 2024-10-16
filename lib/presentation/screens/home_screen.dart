@@ -94,6 +94,8 @@ class _HomeScreenState extends State<HomeScreen> {
 }
 
 class HomePageContent extends StatelessWidget {
+  const HomePageContent({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Padding(

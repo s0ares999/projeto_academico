@@ -80,9 +80,9 @@ Widget buildMatchCard(String team1, String team2, String date, String time, Stri
                   textAlign: TextAlign.center, // Centraliza o texto
                 ),
                 const SizedBox(height: 8),
-                Row(
+                const Row(
                   mainAxisAlignment: MainAxisAlignment.center, // Centraliza os ícones e texto
-                  children: const [
+                  children: [
                     Icon(Icons.calendar_today, size: 16, color: Colors.grey),
                     SizedBox(width: 4),
                     Text(

@@ -9,7 +9,7 @@ class CriarAtletaScreen extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        iconTheme: IconThemeData(color: Colors.black), // Para o botão de voltar
+        iconTheme: const IconThemeData(color: Colors.black), // Para o botão de voltar
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -35,14 +35,14 @@ class CriarAtletaScreen extends StatelessWidget {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
-                    Text(
+                    const Text(
                       'Albert Mussi',
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    SizedBox(width: 8),
+                    const SizedBox(width: 8),
                     Text(
                       '26 anos',
                       style: TextStyle(
@@ -54,19 +54,19 @@ class CriarAtletaScreen extends StatelessWidget {
                 ),
               ),
               
-              SizedBox(height: 24),
+              const SizedBox(height: 24),
               
               // Formulário de criação de atleta
               buildTextField('Data de nascimento', '04 de Maio 2003'),
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
               buildTextField('Clube', 'V. Greens'),
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
               buildTextField('Posição', 'Avançado'),
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
               buildTextField('Nacionalidade', 'Italiano'),
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
               buildTextField('Encarregado de educação/agente', 'Mãe - Ludmila Mussi'),
-              SizedBox(height: 32),
+              const SizedBox(height: 32),
 
               // Botão de Criar Relatório
               Center(
@@ -82,7 +82,7 @@ class CriarAtletaScreen extends StatelessWidget {
                   onPressed: () {
                     // Lógica para criar o relatório
                   },
-                  child: Text(
+                  child: const Text(
                     'CRIAR RELATÓRIO',
                     style: TextStyle(fontSize: 16, color: Colors.white),
                   ),
@@ -97,7 +97,7 @@ class CriarAtletaScreen extends StatelessWidget {
         onTap: (int index) {
           // Lógica para navegar entre as páginas
         },
-        items: [
+        items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.home),
             label: 'Página Inicial',
@@ -126,9 +126,9 @@ class CriarAtletaScreen extends StatelessWidget {
       children: [
         Text(
           label,
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
         ),
-        SizedBox(height: 8),
+        const SizedBox(height: 8),
         TextField(
           decoration: InputDecoration(
             hintText: placeholder,

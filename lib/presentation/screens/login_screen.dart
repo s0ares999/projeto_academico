@@ -3,7 +3,7 @@ import 'home_screen.dart'; // Importa a tela HomeScreen
 import 'forgotpassword_screen.dart'; // Importa a nova tela
 
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({Key? key}) : super(key: key);
+  const LoginScreen({super.key});
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
