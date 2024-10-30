@@ -3,7 +3,6 @@
 import 'package:flutter/material.dart';
 import 'package:pi4_academico/presentation/screens/agenda_screen.dart';
 import 'criaratleta_screen.dart';
-import 'criarrelatorio_screen.dart';
 import 'consultaratleta_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -18,8 +17,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   final List<Widget> _screens = [
     HomePageContent(),
-    AgendaScreen(), // Substituir pela tela de "Agenda"
-    CriarRelatorioScreen(),
+    AgendaScreen(),
     CriarAtletaScreen(),
     ConsultarAtletaScreen(),
   ];
@@ -36,7 +34,7 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(
         backgroundColor: Colors.black,
         elevation: 0,
-        toolbarHeight: 100,
+        toolbarHeight: 80,
         title: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -44,50 +42,87 @@ class _HomeScreenState extends State<HomeScreen> {
               'Pedro Soares',
               style: TextStyle(
                 color: Colors.white,
-                fontSize: 24,
+                fontSize: 20,
                 fontWeight: FontWeight.bold,
               ),
             ),
             Row(
               children: [
-                Icon(Icons.notifications, color: Colors.white),
-                SizedBox(width: 10),
-                Icon(Icons.account_circle, color: Colors.white),
+                Icon(Icons.notifications, color: Colors.white, size: 20),
+                SizedBox(width: 8),
+                Icon(Icons.account_circle, color: Colors.white, size: 20),
               ],
             ),
           ],
         ),
       ),
       body: _screens[_selectedIndex],
-      bottomNavigationBar: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed,
-        backgroundColor: Colors.white,
-        selectedItemColor: Colors.black,
-        unselectedItemColor: Colors.grey,
-        currentIndex: _selectedIndex,
-        onTap: _onItemTapped,
-        items: [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Página Inicial',
+      bottomNavigationBar: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+        child: Container(
+          height: 60,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(30),
+            boxShadow: [
+              BoxShadow(color: Colors.grey.withOpacity(0.2), spreadRadius: 3, blurRadius: 6),
+            ],
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.calendar_today),
-            label: 'Agenda',
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              _buildNavItem(Icons.home, "Início", 0),
+              _buildNavItem(Icons.calendar_today, "Agenda", 1),
+              _buildCentralLogo(),
+              _buildNavItem(Icons.person_add_alt_1, "Criar", 2),
+              _buildNavItem(Icons.people, "Atletas", 3),
+            ],
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.add_circle_outline),
-            label: 'Criar Relatório',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person_add_alt_1),
-            label: 'Criar Atleta',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.people),
-            label: 'Atletas',
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNavItem(IconData icon, String label, int index) {
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          _selectedIndex = index;
+        });
+      },
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, color: _selectedIndex == index ? Colors.orange : Colors.black, size: 20),
+          Text(
+            label,
+            style: TextStyle(
+              color: _selectedIndex == index ? Colors.orange : Colors.black,
+              fontSize: 10,
+            ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildCentralLogo() {
+    return Container(
+      padding: EdgeInsets.all(6),
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(color: Colors.grey, blurRadius: 4),
+        ],
+      ),
+      child: FloatingActionButton(
+        onPressed: () {
+          // Ação quando o logo é pressionado
+        },
+        backgroundColor: Colors.white,
+        elevation: 0,
+        child: Image.asset('assets/images/logoacademico.png', height: 40), // Ajuste o tamanho da logo conforme necessário
       ),
     );
   }
@@ -99,22 +134,22 @@ class HomePageContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(16.0),
+      padding: const EdgeInsets.all(12.0),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
-          SizedBox(height: 20),
+          SizedBox(height: 16),
           Container(
-            padding: EdgeInsets.all(16),
+            padding: EdgeInsets.all(12),
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(12),
               boxShadow: [
                 BoxShadow(
                   color: Colors.grey.withOpacity(0.2),
-                  spreadRadius: 5,
-                  blurRadius: 7,
-                  offset: Offset(0, 3), // changes position of shadow
+                  spreadRadius: 4,
+                  blurRadius: 6,
+                  offset: Offset(0, 3),
                 ),
               ],
             ),
@@ -125,31 +160,31 @@ class HomePageContent extends StatelessWidget {
                   children: [
                     Column(
                       children: [
-                        Image.asset('assets/images/logo_red.png', height: 50),
-                        Text('Red D.', style: TextStyle(fontWeight: FontWeight.bold)),
+                        Image.asset('assets/images/logo_red.png', height: 40),
+                        Text('Red D.', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
                       ],
                     ),
                     Column(
                       children: [
-                        Text('Devils Arena Stadium', style: TextStyle(color: Colors.grey)),
-                        Text('19.45', style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold)),
-                        Text('9 May 2021', style: TextStyle(color: Colors.grey)),
+                        Text('Devils Arena Stadium', style: TextStyle(color: Colors.grey, fontSize: 10)),
+                        Text('19.45', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+                        Text('9 May 2021', style: TextStyle(color: Colors.grey, fontSize: 10)),
                       ],
                     ),
                     Column(
                       children: [
-                        Image.asset('assets/images/logo_green.png', height: 50),
-                        Text('GreenTeam', style: TextStyle(fontWeight: FontWeight.bold)),
+                        Image.asset('assets/images/logo_green.png', height: 40),
+                        Text('GreenTeam', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
                       ],
                     ),
                   ],
                 ),
-                SizedBox(height: 20),
+                SizedBox(height: 16),
                 Text(
                   'Match Countdown',
-                  style: TextStyle(color: Colors.grey, fontWeight: FontWeight.bold),
+                  style: TextStyle(color: Colors.grey, fontWeight: FontWeight.bold, fontSize: 12),
                 ),
-                SizedBox(height: 10),
+                SizedBox(height: 8),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
@@ -173,7 +208,7 @@ class HomePageContent extends StatelessWidget {
         Text(
           value,
           style: TextStyle(
-            fontSize: 24,
+            fontSize: 20,
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -181,6 +216,7 @@ class HomePageContent extends StatelessWidget {
           label,
           style: TextStyle(
             color: Colors.grey,
+            fontSize: 10,
           ),
         ),
       ],
