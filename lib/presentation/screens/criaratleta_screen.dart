@@ -17,45 +17,14 @@ class CriarAtletaScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Nome e idade do atleta (sem imagem)
-              Container(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 16, vertical: 8),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(12),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.grey.withOpacity(0.3),
-                      spreadRadius: 3,
-                      blurRadius: 5,
-                    ),
-                  ],
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Albert Mussi',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      '26 anos',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.grey[700],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              
+              // Campo para Nome do Atleta
+              buildTextField('Nome do Atleta', 'Digite o nome do atleta'),
+              const SizedBox(height: 16),
+
+              // Campo para Ano de Nascimento
+              buildTextField('Ano de Nascimento', 'Digite o ano de nascimento'),
               const SizedBox(height: 24),
-              
+
               // Formulário de criação de atleta
               buildTextField('Data de nascimento', '04 de Maio 2003'),
               const SizedBox(height: 16),
@@ -72,8 +41,7 @@ class CriarAtletaScreen extends StatelessWidget {
               Center(
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 48, vertical: 16),
+                    padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 16),
                     backgroundColor: Colors.black,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),

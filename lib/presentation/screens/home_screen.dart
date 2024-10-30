@@ -58,12 +58,12 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       body: _screens[_selectedIndex],
       bottomNavigationBar: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+        padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 3),
         child: Container(
           height: 60,
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(30),
+            borderRadius: BorderRadius.circular(0),
             boxShadow: [
               BoxShadow(color: Colors.grey.withOpacity(0.2), spreadRadius: 3, blurRadius: 6),
             ],
@@ -107,25 +107,26 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildCentralLogo() {
-    return Container(
-      padding: EdgeInsets.all(6),
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(color: Colors.grey, blurRadius: 4),
-        ],
+  return Container(
+    margin: EdgeInsets.only(bottom: 1), // Levanta o logo por 2 pixels
+    padding: EdgeInsets.all(6),
+    decoration: BoxDecoration(
+      shape: BoxShape.circle,
+      color: Colors.white,
+      boxShadow: [
+        BoxShadow(color: Colors.grey, blurRadius: 4),
+      ],
+    ),
+    child: Container(
+      // Usando um Container para exibir a imagem
+      child: Image.asset(
+        'assets/images/logoacademico.png',
+        height: 50, // Ajuste o tamanho da logo conforme necessário
       ),
-      child: FloatingActionButton(
-        onPressed: () {
-          // Ação quando o logo é pressionado
-        },
-        backgroundColor: Colors.white,
-        elevation: 0,
-        child: Image.asset('assets/images/logoacademico.png', height: 40), // Ajuste o tamanho da logo conforme necessário
-      ),
-    );
-  }
+    ),
+  );
+}
+
 }
 
 class HomePageContent extends StatelessWidget {
