@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:pi4_academico/presentation/screens/agenda_screen.dart';
+import 'package:pi4_academico/presentation/screens/notificacoes_screen.dart';
 import 'criaratleta_screen.dart';
 import 'consultaratleta_screen.dart';
 
@@ -48,7 +49,17 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             Row(
               children: [
-                Icon(Icons.notifications, color: Colors.white, size: 20),
+                IconButton(
+                  icon:
+                      Icon(Icons.notifications, color: Colors.white, size: 20),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => NotificacoesScreen()),
+                    );
+                  },
+                ),
                 SizedBox(width: 8),
                 Icon(Icons.account_circle, color: Colors.white, size: 20),
               ],
@@ -65,7 +76,10 @@ class _HomeScreenState extends State<HomeScreen> {
             color: Colors.white,
             borderRadius: BorderRadius.circular(0),
             boxShadow: [
-              BoxShadow(color: Colors.grey.withOpacity(0.2), spreadRadius: 3, blurRadius: 6),
+              BoxShadow(
+                  color: Colors.grey.withOpacity(0.2),
+                  spreadRadius: 3,
+                  blurRadius: 6),
             ],
           ),
           child: Row(
@@ -93,7 +107,9 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, color: _selectedIndex == index ? Colors.orange : Colors.black, size: 20),
+          Icon(icon,
+              color: _selectedIndex == index ? Colors.orange : Colors.black,
+              size: 20),
           Text(
             label,
             style: TextStyle(
@@ -107,26 +123,25 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildCentralLogo() {
-  return Container(
-    margin: EdgeInsets.only(bottom: 1), // Levanta o logo por 2 pixels
-    padding: EdgeInsets.all(6),
-    decoration: BoxDecoration(
-      shape: BoxShape.circle,
-      color: Colors.white,
-      boxShadow: [
-        BoxShadow(color: Colors.grey, blurRadius: 4),
-      ],
-    ),
-    child: Container(
-      // Usando um Container para exibir a imagem
-      child: Image.asset(
-        'assets/images/logoacademico.png',
-        height: 50, // Ajuste o tamanho da logo conforme necessário
+    return Container(
+      margin: EdgeInsets.only(bottom: 1), // Levanta o logo por 2 pixels
+      padding: EdgeInsets.all(6),
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(color: Colors.grey, blurRadius: 4),
+        ],
       ),
-    ),
-  );
-}
-
+      child: Container(
+        // Usando um Container para exibir a imagem
+        child: Image.asset(
+          'assets/images/logoacademico.png',
+          height: 50, // Ajuste o tamanho da logo conforme necessário
+        ),
+      ),
+    );
+  }
 }
 
 class HomePageContent extends StatelessWidget {
@@ -162,20 +177,28 @@ class HomePageContent extends StatelessWidget {
                     Column(
                       children: [
                         Image.asset('assets/images/logo_red.png', height: 40),
-                        Text('Red D.', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                        Text('Red D.',
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold, fontSize: 12)),
                       ],
                     ),
                     Column(
                       children: [
-                        Text('Devils Arena Stadium', style: TextStyle(color: Colors.grey, fontSize: 10)),
-                        Text('19.45', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-                        Text('9 May 2021', style: TextStyle(color: Colors.grey, fontSize: 10)),
+                        Text('Devils Arena Stadium',
+                            style: TextStyle(color: Colors.grey, fontSize: 10)),
+                        Text('19.45',
+                            style: TextStyle(
+                                fontSize: 24, fontWeight: FontWeight.bold)),
+                        Text('9 May 2021',
+                            style: TextStyle(color: Colors.grey, fontSize: 10)),
                       ],
                     ),
                     Column(
                       children: [
                         Image.asset('assets/images/logo_green.png', height: 40),
-                        Text('GreenTeam', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                        Text('GreenTeam',
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold, fontSize: 12)),
                       ],
                     ),
                   ],
@@ -183,7 +206,10 @@ class HomePageContent extends StatelessWidget {
                 SizedBox(height: 16),
                 Text(
                   'Match Countdown',
-                  style: TextStyle(color: Colors.grey, fontWeight: FontWeight.bold, fontSize: 12),
+                  style: TextStyle(
+                      color: Colors.grey,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 12),
                 ),
                 SizedBox(height: 8),
                 Row(
