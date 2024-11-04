@@ -4,30 +4,30 @@ const sequelize = require('../config/database');
 
 // Importação dos modelos
 const Atleta = require('./atleta')(sequelize);
-const Time = require('./time');
-const Formacao = require('./formacao');
-const Notificacao = require('./notificacao');
-const Partida = require('./partida');
-const Relatorio = require('./relatorio');
-const ScoutAtleta = require('./scoutatleta');
-const EquipaSombra = require('./equipasombra');
-const AtletaEquipaSombra = require('./atletaequipasombra');
-const Utilizador = require('./utilizador');
-const Website = require('./website');
+const Time = require('./time')(sequelize); // Adicionado (sequelize)
+const Formacao = require('./formacao')(sequelize); // Adicionado (sequelize)
+const Notificacao = require('./notificacao')(sequelize); // Adicionado (sequelize)
+const Partida = require('./partida')(sequelize); // Adicionado (sequelize)
+const Relatorio = require('./relatorio')(sequelize); // Adicionado (sequelize)
+const ScoutAtleta = require('./scoutatleta')(sequelize); // Adicionado (sequelize)
+const EquipaSombra = require('./equipasombra')(sequelize); // Adicionado (sequelize)
+const AtletaEquipaSombra = require('./atletaequipasombra')(sequelize); // Adicionado (sequelize)
+const Utilizador = require('./utilizador')(sequelize); // Adicionado (sequelize)
+const Website = require('./website')(sequelize); // Adicionado (sequelize)
 
 // Inicializando os modelos
 const models = {
-  Atleta: Atleta(sequelize),
-  Time: Time(sequelize),
-  Formacao: Formacao(sequelize),
-  Notificacao: Notificacao(sequelize),
-  Partida: Partida(sequelize),
-  Relatorio: Relatorio(sequelize),
-  ScoutAtleta: ScoutAtleta(sequelize),
-  EquipaSombra: EquipaSombra(sequelize),
-  AtletaEquipaSombra: AtletaEquipaSombra(sequelize),
-  Utilizador: Utilizador(sequelize),
-  Website: Website(sequelize)
+  Atleta,
+  Time,
+  Formacao,
+  Notificacao,
+  Partida,
+  Relatorio,
+  ScoutAtleta,
+  EquipaSombra,
+  AtletaEquipaSombra,
+  Utilizador,
+  Website
 };
 
 // Definindo associações
