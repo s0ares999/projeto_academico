@@ -1,13 +1,19 @@
 // models/AtletaEquipaSombra.js
 const { DataTypes } = require('sequelize');
-const sequelize = require('../config/database');
 
-const AtletaEquipaSombra = sequelize.define('AtletaEquipaSombra', {
-  ID_EQUIPASOMBRA: { type: DataTypes.INTEGER, primaryKey: true },
-  ID_ATLETA: { type: DataTypes.INTEGER, primaryKey: true },
-}, {
-  tableName: 'ATLETAEQUIPESOMBRA',
-  timestamps: false,
-});
+module.exports = (sequelize) => {
+  const AtletaEquipaSombra = sequelize.define('AtletaEquipaSombra', {
+    ID_ATLETA_EQUIPA: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement: true,
+    },
+    ID_ATLETA: DataTypes.INTEGER,
+    ID_EQUIPASOMBRA: DataTypes.INTEGER,
+  }, {
+    tableName: 'ATLETA_EQUIPA_SOMBRA',
+    timestamps: false,
+  });
 
-module.exports = AtletaEquipaSombra;
+  return AtletaEquipaSombra;
+};

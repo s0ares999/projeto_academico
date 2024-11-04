@@ -1,13 +1,19 @@
 // models/ScoutAtleta.js
 const { DataTypes } = require('sequelize');
-const sequelize = require('../config/database');
 
-const ScoutAtleta = sequelize.define('ScoutAtleta', {
-  ID_UTILIZADOR: { type: DataTypes.INTEGER, primaryKey: true },
-  ID_RELATORIO: { type: DataTypes.INTEGER, primaryKey: true },
-}, {
-  tableName: 'SCOUTATLETA',
-  timestamps: false,
-});
+module.exports = (sequelize) => {
+  const ScoutAtleta = sequelize.define('ScoutAtleta', {
+    ID_SCOUT: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement: true,
+    },
+    ID_ATLETA: DataTypes.INTEGER,
+    AVALIACAO: DataTypes.TEXT,
+  }, {
+    tableName: 'SCOUT_ATLETA',
+    timestamps: false,
+  });
 
-module.exports = ScoutAtleta;
+  return ScoutAtleta;
+};
