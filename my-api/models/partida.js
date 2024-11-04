@@ -1,16 +1,29 @@
 // models/Partida.js
 const { DataTypes } = require('sequelize');
 
-module.exports = (sequelize) => {
+const definePartida = (sequelize) => {
   const Partida = sequelize.define('Partida', {
     ID_PARTIDA: {
       type: DataTypes.INTEGER,
       primaryKey: true,
-      autoIncrement: true,
+      autoIncrement: true
     },
     DATA: DataTypes.DATE,
-    TIME1: DataTypes.INTEGER,
-    TIME2: DataTypes.INTEGER,
+    LOCAL: DataTypes.TEXT,
+    ID_TIME_LOCAL: {
+      type: DataTypes.INTEGER,
+      references: {
+        model: 'TIME',
+        key: 'ID_TIME'
+      }
+    },
+    ID_TIME_VISITANTE: {
+      type: DataTypes.INTEGER,
+      references: {
+        model: 'TIME',
+        key: 'ID_TIME'
+      }
+    },
     RESULTADO: DataTypes.TEXT,
   }, {
     tableName: 'PARTIDA',
@@ -19,3 +32,5 @@ module.exports = (sequelize) => {
 
   return Partida;
 };
+
+module.exports = definePartida;

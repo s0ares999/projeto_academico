@@ -1,12 +1,12 @@
 // models/Website.js
 const { DataTypes } = require('sequelize');
 
-module.exports = (sequelize) => {
+const defineWebsite = (sequelize) => {
   const Website = sequelize.define('Website', {
     ID_WEBSITE: {
       type: DataTypes.INTEGER,
       primaryKey: true,
-      autoIncrement: true,
+      autoIncrement: true
     },
     URL: DataTypes.TEXT,
     DESCRICAO: DataTypes.TEXT,
@@ -17,3 +17,5 @@ module.exports = (sequelize) => {
 
   return Website;
 };
+
+module.exports = defineWebsite;

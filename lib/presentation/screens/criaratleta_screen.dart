@@ -55,7 +55,7 @@ class CriarAtletaScreen extends StatelessWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => CriarRelatorioScreen()),
+                          builder: (context) => const CriarRelatorioScreen()),
                     );
                   },
                   child: const Text(

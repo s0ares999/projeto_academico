@@ -1,12 +1,12 @@
-// models/atleta.js
+// models/Atleta.js
 const { DataTypes } = require('sequelize');
 
-module.exports = (sequelize) => {
+const defineAtleta = (sequelize) => {
   const Atleta = sequelize.define('Atleta', {
     ID_ATLETA: {
       type: DataTypes.INTEGER,
       primaryKey: true,
-      autoIncrement: true,
+      autoIncrement: true
     },
     NOME: DataTypes.TEXT,
     DATANASCIMENTO: DataTypes.DATE,
@@ -22,5 +22,12 @@ module.exports = (sequelize) => {
     timestamps: false,
   });
 
+  // Associações
+  Atleta.associate = (models) => {
+    Atleta.belongsTo(models.Time, { foreignKey: 'ID_TIME' });
+  };
+
   return Atleta;
 };
+
+module.exports = defineAtleta;

@@ -1,15 +1,22 @@
 // models/Relatorio.js
 const { DataTypes } = require('sequelize');
 
-module.exports = (sequelize) => {
+const defineRelatorio = (sequelize) => {
   const Relatorio = sequelize.define('Relatorio', {
     ID_RELATORIO: {
       type: DataTypes.INTEGER,
       primaryKey: true,
-      autoIncrement: true,
+      autoIncrement: true
     },
-    DESCRICAO: DataTypes.TEXT,
+    CONTEUDO: DataTypes.TEXT,
     DATA: DataTypes.DATE,
+    ID_ATLETA: {
+      type: DataTypes.INTEGER,
+      references: {
+        model: 'ATLETA',
+        key: 'ID_ATLETA'
+      }
+    },
   }, {
     tableName: 'RELATORIO',
     timestamps: false,
@@ -17,3 +24,5 @@ module.exports = (sequelize) => {
 
   return Relatorio;
 };
+
+module.exports = defineRelatorio;

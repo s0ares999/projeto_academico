@@ -1,14 +1,15 @@
 // models/EquipaSombra.js
 const { DataTypes } = require('sequelize');
 
-module.exports = (sequelize) => {
+const defineEquipaSombra = (sequelize) => {
   const EquipaSombra = sequelize.define('EquipaSombra', {
-    ID_EQUIPASOMBRA: {
+    ID_EQUIPA: {
       type: DataTypes.INTEGER,
       primaryKey: true,
-      autoIncrement: true,
+      autoIncrement: true
     },
     NOME: DataTypes.TEXT,
+    DESCRICAO: DataTypes.TEXT,
   }, {
     tableName: 'EQUIPA_SOMBRA',
     timestamps: false,
@@ -16,3 +17,5 @@ module.exports = (sequelize) => {
 
   return EquipaSombra;
 };
+
+module.exports = defineEquipaSombra;
