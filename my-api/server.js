@@ -2,6 +2,8 @@ const express = require('express');
 const { Sequelize } = require('sequelize');
 const app = express();
 const PORT = process.env.PORT || 3000;
+const db = require('./models'); // Importa os models e associações
+require('./models/associations'); // Configura as associações
 
 require('dotenv').config();
 
@@ -18,32 +20,16 @@ sequelize.authenticate()
   .then(() => console.log('Conectado ao PostgreSQL'))
   .catch(err => console.error('Erro ao conectar ao PostgreSQL:', err));
 
-// Modelo de dados
-const Player = sequelize.define('Player', {
-  name: {
-    type: Sequelize.STRING,
-    allowNull: false,
-  },
-  age: {
-    type: Sequelize.INTEGER,
-    allowNull: false,
-  },
-  team: {
-    type: Sequelize.STRING,
-    allowNull: false,
-  },
-});
-
 // Rotas
 app.get('/', (req, res) => {
   res.send('API funcionando!');
 });
 
-// Criar um jogador
-app.post('/players', async (req, res) => {
+// Criar um atleta (exemplo)
+app.post('/atletas', async (req, res) => {
   try {
-    const player = await Player.create(req.body);
-    res.status(201).json(player);
+    const atleta = await db.Atleta.create(req.body);
+    res.status(201).json(atleta);
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
