@@ -1,4 +1,4 @@
-// ignore_for_file: prefer_const_literals_to_create_immutables, prefer_const_constructors
+// ignore_for_file: prefer_const_literals_to_create_immutables, prefer_const_constructors, unused_element
 
 import 'package:flutter/material.dart';
 
@@ -10,7 +10,6 @@ class ConsultarAtletaScreen extends StatefulWidget {
 }
 
 class _ConsultarAtletaScreenState extends State<ConsultarAtletaScreen> {
-  int _selectedIndex = 0;
 
   final List<Map<String, dynamic>> athletes = [
     {'name': 'VINCENT GHEZZAL', 'year': 2000},
@@ -25,7 +24,6 @@ class _ConsultarAtletaScreenState extends State<ConsultarAtletaScreen> {
 
   void _onBottomNavTapped(int index) {
     setState(() {
-      _selectedIndex = index;
     });
   }
 
@@ -54,7 +52,7 @@ class _ConsultarAtletaScreenState extends State<ConsultarAtletaScreen> {
               ),
             ),
           ),
-          Container(
+          SizedBox(
             height: 40,
             child: ListView.builder(
               scrollDirection: Axis.horizontal,

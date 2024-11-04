@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pi4_academico/presentation/screens/criarrelatorio_screen.dart';
 
 class CriarAtletaScreen extends StatelessWidget {
   const CriarAtletaScreen({super.key});
@@ -7,9 +8,10 @@ class CriarAtletaScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
+        backgroundColor: const Color.fromARGB(0, 255, 255, 255),
         elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.black), // Para o botão de voltar
+        iconTheme:
+            const IconThemeData(color: Colors.black), // Para o botão de voltar
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -34,21 +36,27 @@ class CriarAtletaScreen extends StatelessWidget {
               const SizedBox(height: 16),
               buildTextField('Nacionalidade', 'Italiano'),
               const SizedBox(height: 16),
-              buildTextField('Encarregado de educação/agente', 'Mãe - Ludmila Mussi'),
+              buildTextField(
+                  'Encarregado de educação/agente', 'Mãe - Ludmila Mussi'),
               const SizedBox(height: 32),
 
               // Botão de Criar Relatório
               Center(
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 16),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 48, vertical: 16),
                     backgroundColor: Colors.black,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
                   ),
                   onPressed: () {
-                    // Lógica para criar o relatório
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => CriarRelatorioScreen()),
+                    );
                   },
                   child: const Text(
                     'CRIAR RELATÓRIO',
