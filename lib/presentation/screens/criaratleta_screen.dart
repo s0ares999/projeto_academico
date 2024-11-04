@@ -12,8 +12,6 @@ class CriarAtletaScreen extends StatelessWidget {
         title: const Text('CRIAR ATLETA'),
         centerTitle: true,
         elevation: 0,
-        iconTheme:
-            const IconThemeData(color: Colors.black), // Para o botão de voltar
       ),
       body: SingleChildScrollView(
         child: Padding(

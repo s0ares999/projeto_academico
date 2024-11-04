@@ -64,7 +64,7 @@ Widget buildMatchCard(String team1, String team2, String date, String time, Stri
               ),
             ],
           ),
-          
+
           // Conteúdo central (equipa vs equipa e data)
           Expanded( // O conteúdo central expande-se conforme necessário
             child: Column(
@@ -103,7 +103,7 @@ Widget buildMatchCard(String team1, String team2, String date, String time, Stri
               ],
             ),
           ),
-          
+
           // Coluna da equipa 2
           Column(
             children: [
