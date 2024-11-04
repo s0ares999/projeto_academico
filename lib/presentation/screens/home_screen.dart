@@ -2,9 +2,12 @@
 
 import 'package:flutter/material.dart';
 import 'package:pi4_academico/presentation/screens/agenda_screen.dart';
+import 'package:pi4_academico/presentation/screens/login_screen.dart';
 import 'package:pi4_academico/presentation/screens/notificacoes_screen.dart';
 import 'criaratleta_screen.dart';
 import 'consultaratleta_screen.dart';
+import 'package:provider/provider.dart'; // Importa o Provider
+import '/theme_notifier.dart'; // Importa sua classe ThemeNotifier
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -48,10 +51,10 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
             Row(
+              mainAxisSize: MainAxisSize.min, // Adiciona essa linha
               children: [
                 IconButton(
-                  icon:
-                      Icon(Icons.notifications, color: Colors.white, size: 20),
+                  icon: Icon(Icons.notifications, color: Colors.white, size: 20), // Tamanho do ícone ajustado
                   onPressed: () {
                     Navigator.push(
                       context,
@@ -60,8 +63,31 @@ class _HomeScreenState extends State<HomeScreen> {
                     );
                   },
                 ),
-                SizedBox(width: 8),
-                Icon(Icons.account_circle, color: Colors.white, size: 20),
+                IconButton(
+                  icon: Icon(Icons.logout, color: Colors.white, size: 20), // Tamanho do ícone ajustado
+                  onPressed: () {
+                    // Navegar para a página de login ao clicar no ícone de logout
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(builder: (context) => LoginScreen()),
+                    );
+                  },
+                ),
+                // Ícone para alternar entre Modo Claro e Escuro
+                IconButton(
+                  icon: Icon(
+                    Provider.of<ThemeNotifier>(context).isDarkMode
+                        ? Icons.brightness_3 // Lua
+                        : Icons.brightness_7, // Sol
+                    color: Colors.white,
+                    size: 20,
+                  ),
+                  onPressed: () {
+                    // Alterna o tema
+                    Provider.of<ThemeNotifier>(context, listen: false)
+                        .toggleTheme();
+                  },
+                ),
               ],
             ),
           ],

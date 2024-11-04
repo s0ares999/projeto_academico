@@ -30,16 +30,16 @@ class CriarAtletaScreen extends StatelessWidget {
               const SizedBox(height: 24),
 
               // Formulário de criação de atleta
-              buildTextField('Data de nascimento', '04 de Maio 2003'),
+              buildTextField('Data de nascimento', 'Digite a data de nascimento'),
               const SizedBox(height: 16),
-              buildTextField('Clube', 'V. Greens'),
+              buildTextField('Clube', 'Digite o Clube'),
               const SizedBox(height: 16),
-              buildTextField('Posição', 'Avançado'),
+              buildTextField('Posição', 'Digite a Posição'),
               const SizedBox(height: 16),
-              buildTextField('Nacionalidade', 'Italiano'),
+              buildTextField('Nacionalidade', 'Digite a Nacionalidade'),
               const SizedBox(height: 16),
               buildTextField(
-                  'Encarregado de educação/agente', 'Mãe - Ludmila Mussi'),
+                  'Encarregado de educação/agente', 'Digite o encarregado de Educação'),
               const SizedBox(height: 32),
 
               // Botão de Criar Relatório
@@ -61,7 +61,7 @@ class CriarAtletaScreen extends StatelessWidget {
                     );
                   },
                   child: const Text(
-                    'CRIAR RELATÓRIO',
+                    'Criar Relatório',
                     style: TextStyle(fontSize: 16, color: Colors.white),
                   ),
                 ),

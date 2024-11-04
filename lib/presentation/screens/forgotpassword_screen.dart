@@ -9,7 +9,7 @@ class ForgotPasswordScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Esqueci a Palavra-Passe'),
+        title: const Text('Esqueci a Palavra-Passe', style: TextStyle(fontSize: 16,)),
         backgroundColor: const Color.fromARGB(255, 255, 255, 255),
       ),
       body: Padding(
@@ -52,7 +52,7 @@ class ForgotPasswordScreen extends StatelessWidget {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                child: const Text('Enviar E-mail'),
+                child: const Text('Enviar E-mail', style: TextStyle(color: Colors.white)),
               ),
             ),
           ],

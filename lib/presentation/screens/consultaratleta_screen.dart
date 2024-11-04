@@ -1,4 +1,4 @@
-// ignore_for_file: prefer_const_literals_to_create_immutables, prefer_const_constructors, unused_element
+// ignore_for_file: prefer_const_literals_to_create_immutables, prefer_const_constructors, unused_element, library_private_types_in_public_api
 
 import 'package:flutter/material.dart';
 
@@ -31,7 +31,6 @@ class _ConsultarAtletaScreenState extends State<ConsultarAtletaScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: const Color.fromARGB(255, 255, 255, 255),
         title: const Text('CONSULTAR ATLETAS'),
         centerTitle: true,
       ),

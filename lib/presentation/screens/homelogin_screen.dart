@@ -1,14 +1,20 @@
 import 'package:flutter/material.dart';
 import 'login_screen.dart'; // Importa a nova tela
 
-class HomeLoginScreen extends StatelessWidget {
+class HomeLoginScreen extends StatefulWidget {
   const HomeLoginScreen({super.key});
+
+  @override
+  State<HomeLoginScreen> createState() => _HomeLoginScreenState();
+}
+
+class _HomeLoginScreenState extends State<HomeLoginScreen> {
+  String? selectedValue;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        // Remover o título da AppBar
         centerTitle: true,
         backgroundColor: const Color.fromARGB(255, 255, 255, 255),
       ),
@@ -17,7 +23,7 @@ class HomeLoginScreen extends StatelessWidget {
           gradient: LinearGradient(
             colors: [
               Color.fromARGB(255, 255, 255, 255), // Cor inicial do gradiente
-              Color.fromARGB(255, 255, 255, 255) // Cor final do gradiente
+              Color.fromARGB(255, 255, 255, 255), // Cor final do gradiente
             ],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
@@ -88,6 +94,29 @@ class HomeLoginScreen extends StatelessWidget {
                   ),
                 ),
                 child: const Text('LOGIN'),
+              ),
+              const SizedBox(height: 16), // Margem menor para compactar
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Radio<String>(
+                    value: 'accept_terms', // Valor que representa a seleção
+                    groupValue: selectedValue,
+                    onChanged: (value) {
+                      setState(() {
+                        selectedValue = value; // Atualiza o estado
+                      });
+                    },
+                    activeColor: Colors.orange, // Cor quando ativo
+                  ),
+                  const Text(
+                    'Aceito os termos e políticas de privacidade',
+                    style: TextStyle(
+                      fontSize: 12, // Tamanho da fonte menor
+                      color: Color.fromARGB(255, 0, 0, 0), // Cor do texto
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
