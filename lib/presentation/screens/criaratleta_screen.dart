@@ -9,6 +9,8 @@ class CriarAtletaScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: const Color.fromARGB(0, 255, 255, 255),
+        title: const Text('CRIAR ATLETA'),
+        centerTitle: true,
         elevation: 0,
         iconTheme:
             const IconThemeData(color: Colors.black), // Para o botão de voltar

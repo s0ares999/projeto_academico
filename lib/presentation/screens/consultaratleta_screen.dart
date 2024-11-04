@@ -32,7 +32,7 @@ class _ConsultarAtletaScreenState extends State<ConsultarAtletaScreen> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: const Color.fromARGB(255, 255, 255, 255),
-        title: const Text('ATLETAS'),
+        title: const Text('CONSULTAR ATLETAS'),
         centerTitle: true,
       ),
       body: Column(
