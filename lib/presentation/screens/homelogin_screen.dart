@@ -14,20 +14,9 @@ class _HomeLoginScreenState extends State<HomeLoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        centerTitle: true,
-        backgroundColor: const Color.fromARGB(255, 255, 255, 255),
-      ),
       body: Container(
         decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              Color.fromARGB(255, 255, 255, 255), // Cor inicial do gradiente
-              Color.fromARGB(255, 255, 255, 255), // Cor final do gradiente
-            ],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
+          color: Color.fromARGB(255, 0, 0, 0),
         ),
         child: Center(
           child: Column(
@@ -35,48 +24,39 @@ class _HomeLoginScreenState extends State<HomeLoginScreen> {
             children: <Widget>[
               Image.asset(
                 'assets/images/logoacademico.png',
-                height: 150, // Ajuste o tamanho da imagem
+                height: 200,
               ),
-              const SizedBox(height: 15),
+              const SizedBox(height: 30),
               const Text(
-                'Académico de Viseu', // Primeira linha do título
-                textAlign: TextAlign.center, // Centraliza o texto
+                'VIRIATOS SCOUTING',
+                textAlign: TextAlign.center,
                 style: TextStyle(
-                  fontSize: 24,
+                  fontSize: 26,
                   fontWeight: FontWeight.bold,
-                  color: Color.fromARGB(255, 0, 0, 0), // Cor do texto
+                  color: Color.fromARGB(255, 255, 255, 255),
                 ),
               ),
-              const Text(
-                'Futebol Clube', // Segunda linha do título
-                textAlign: TextAlign.center, // Centraliza o texto
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: Color.fromARGB(255, 0, 0, 0), // Cor do texto
-                ),
-              ),
+              
               const SizedBox(height: 70),
               const Text(
                 'Bem-vindo',
                 style: TextStyle(
-                  fontSize: 18,
+                  fontSize: 26,
                   fontWeight: FontWeight.bold,
-                  color: Color.fromARGB(255, 0, 0, 0), // Cor do texto
+                  color: Color.fromARGB(255, 237, 172, 43),
                 ),
               ),
-              const SizedBox(height: 10),
+              const SizedBox(height: 30),
               const Text(
-                'Onde o potencial encontra a qualidade',
+                'Onde o potencial encontra a oportunidade!',
                 style: TextStyle(
-                  fontSize: 14,
-                  color: Color.fromARGB(255, 0, 0, 0), // Cor do texto
+                  fontSize: 19,
+                  color: Color.fromARGB(255, 255, 255, 255),
                 ),
               ),
               const SizedBox(height: 50),
               ElevatedButton(
                 onPressed: () {
-                  // Navega para a tela de login
                   Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(
@@ -85,35 +65,54 @@ class _HomeLoginScreenState extends State<HomeLoginScreen> {
                   );
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color.fromARGB(218, 218, 218, 218), // Cor de fundo do botão
-                  padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+                  backgroundColor: Colors.white, 
+                  padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 20),
                   textStyle: const TextStyle(
-                    fontSize: 14,
+                    fontSize: 16,
                     fontWeight: FontWeight.bold,
-                    color: Color.fromARGB(255, 255, 255, 255), // Cor do texto do botão
                   ),
                 ),
-                child: const Text('LOGIN'),
+                child: const Text(
+                  'LOGIN',
+                  style: TextStyle(
+                    color: Colors.black, 
+                  ),
+                ),
               ),
-              const SizedBox(height: 16), // Margem menor para compactar
+              const SizedBox(height: 16),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Radio<String>(
-                    value: 'accept_terms', // Valor que representa a seleção
+               Theme(
+                  data: Theme.of(context).copyWith(
+                    unselectedWidgetColor: Colors.orange, // Borda laranja para o estado não selecionado
+                  ),
+                  child: Radio<String>(
+                    value: 'accept_terms',
                     groupValue: selectedValue,
                     onChanged: (value) {
                       setState(() {
-                        selectedValue = value; // Atualiza o estado
+                        selectedValue = value;
                       });
                     },
-                    activeColor: Colors.orange, // Cor quando ativo
+                    activeColor: Colors.orange, // Cor de preenchimento quando selecionado
                   ),
-                  const Text(
-                    'Aceito os termos e políticas de privacidade',
-                    style: TextStyle(
-                      fontSize: 12, // Tamanho da fonte menor
-                      color: Color.fromARGB(255, 0, 0, 0), // Cor do texto
+                ),
+                  const Text.rich(
+                    TextSpan(
+                      text: 'Aceito as ',
+                      style: TextStyle(
+                        fontSize: 18,
+                        color: Color.fromARGB(255, 255, 255, 255),
+                      ),
+                      children: [
+                        TextSpan(
+                          text: 'políticas de privacidade',
+                          style: TextStyle(
+                            color: Color.fromARGB(255, 237, 172, 43),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ],
