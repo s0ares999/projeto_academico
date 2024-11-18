@@ -1,7 +1,7 @@
 // models/Atleta.js
 const { DataTypes } = require('sequelize');
 
-const defineAtleta = (sequelize) => {
+module.exports = (sequelize) => {
   const Atleta = sequelize.define('Atleta', {
     ID_ATLETA: {
       type: DataTypes.INTEGER,
@@ -22,12 +22,10 @@ const defineAtleta = (sequelize) => {
     timestamps: false,
   });
 
-  // Associações
+  // Define associações
   Atleta.associate = (models) => {
     Atleta.belongsTo(models.Time, { foreignKey: 'ID_TIME' });
   };
 
   return Atleta;
 };
-
-module.exports = defineAtleta;

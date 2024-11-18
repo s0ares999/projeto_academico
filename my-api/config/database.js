@@ -1,22 +1,18 @@
-// config/database.js
-const { Sequelize } = require('sequelize');
-require('dotenv').config(); // Carrega as variáveis de ambiente do arquivo .env
+require('dotenv').config(); // Carrega variáveis de ambiente
 
-// Criação da instância do Sequelize usando a URL do banco de dados
+const { Sequelize } = require('sequelize');
+
+// Certifique-se de que a variável DATABASE_URL está sendo lida corretamente
 const sequelize = new Sequelize(process.env.DATABASE_URL, {
   dialect: 'postgres',
-  // Habilite o logging se precisar de mais informações durante a depuração
+  protocol: 'postgres',
   logging: false,
+  dialectOptions: {
+    ssl: {
+      require: true,
+      rejectUnauthorized: false, // Para aceitar certificados não verificados
+    },
+  },
 });
 
-// Testar a conexão (opcional, mas recomendado para depuração)
-sequelize.authenticate()
-  .then(() => {
-    console.log('Conectado ao banco de dados com sucesso!');
-  })
-  .catch(err => {
-    console.error('Não foi possível conectar ao banco de dados:', err);
-  });
-
-// Exporte a instância do Sequelize para ser usada em outros arquivos
-module.exports = sequelize;
+module.exports = { sequelize }; // Exporte a instância do sequelize

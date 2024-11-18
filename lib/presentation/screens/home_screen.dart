@@ -1,4 +1,4 @@
-// ignore_for_file: prefer_const_literals_to_create_immutables, prefer_const_constructors
+// ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
 
 import 'package:flutter/material.dart';
 import 'package:pi4_academico/presentation/screens/agenda_screen.dart';
@@ -6,8 +6,8 @@ import 'package:pi4_academico/presentation/screens/login_screen.dart';
 import 'package:pi4_academico/presentation/screens/notificacoes_screen.dart';
 import 'criaratleta_screen.dart';
 import 'consultaratleta_screen.dart';
-import 'package:provider/provider.dart'; // Importa o Provider
-import '/theme_notifier.dart'; // Importa sua classe ThemeNotifier
+import 'package:provider/provider.dart';
+import '/theme_notifier.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -35,72 +35,80 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.black,
-        elevation: 0,
-        toolbarHeight: 80,
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              'Pedro Soares',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
+      body: Column(
+        children: [
+          // Seção do topo arredondada
+          Container(
+            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 30),
+            decoration: BoxDecoration(
+              color: Colors.black,
+              borderRadius: BorderRadius.vertical(
+                bottom: Radius.circular(20),
               ),
             ),
-            Row(
-              mainAxisSize: MainAxisSize.min, // Adiciona essa linha
-              children: [
-                IconButton(
-                  icon: Icon(Icons.notifications, color: Colors.white, size: 20), // Tamanho do ícone ajustado
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => NotificacoesScreen()),
-                    );
-                  },
-                ),
-                IconButton(
-                  icon: Icon(Icons.logout, color: Colors.white, size: 20), // Tamanho do ícone ajustado
-                  onPressed: () {
-                    // Navegar para a página de login ao clicar no ícone de logout
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(builder: (context) => LoginScreen()),
-                    );
-                  },
-                ),
-                // Ícone para alternar entre Modo Claro e Escuro
-                IconButton(
-                  icon: Icon(
-                    Provider.of<ThemeNotifier>(context).isDarkMode
-                        ? Icons.brightness_3 // Lua
-                        : Icons.brightness_7, // Sol
-                    color: Colors.white,
-                    size: 20,
+            child: SafeArea(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Pedro Soares',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                  onPressed: () {
-                    // Alterna o tema
-                    Provider.of<ThemeNotifier>(context, listen: false)
-                        .toggleTheme();
-                  },
-                ),
-              ],
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        icon: Icon(Icons.notifications, color: Colors.white, size: 20),
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => NotificacoesScreen()),
+                          );
+                        },
+                      ),
+                      IconButton(
+                        icon: Icon(Icons.logout, color: Colors.white, size: 20),
+                        onPressed: () {
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(builder: (context) => LoginScreen()),
+                          );
+                        },
+                      ),
+                      IconButton(
+                        icon: Icon(
+                          Provider.of<ThemeNotifier>(context).isDarkMode
+                              ? Icons.brightness_3
+                              : Icons.brightness_7,
+                          color: Colors.white,
+                          size: 20,
+                        ),
+                        onPressed: () {
+                          Provider.of<ThemeNotifier>(context, listen: false)
+                              .toggleTheme();
+                        },
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
-          ],
-        ),
+          ),
+          Expanded(
+            child: _screens[_selectedIndex],
+          ),
+        ],
       ),
-      body: _screens[_selectedIndex],
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 3),
         child: Container(
           height: 60,
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(0),
             boxShadow: [
               BoxShadow(
                   color: Colors.grey.withOpacity(0.2),
@@ -149,21 +157,26 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildCentralLogo() {
-    return Container(
-      margin: EdgeInsets.only(bottom: 1), // Levanta o logo por 2 pixels
-      padding: EdgeInsets.all(6),
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(color: Colors.grey, blurRadius: 4),
-        ],
-      ),
+    return GestureDetector(
+      onTap: () {
+        // Navegação para a página inicial ao clicar no logotipo central
+        setState(() {
+          _selectedIndex = 0;
+        });
+      },
       child: Container(
-        // Usando um Container para exibir a imagem
+        margin: EdgeInsets.only(bottom: 1),
+        padding: EdgeInsets.all(6),
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: Colors.white,
+          boxShadow: [
+            BoxShadow(color: Colors.grey, blurRadius: 4),
+          ],
+        ),
         child: Image.asset(
           'assets/images/logoacademico.png',
-          height: 50, // Ajuste o tamanho da logo conforme necessário
+          height: 50,
         ),
       ),
     );
@@ -178,7 +191,7 @@ class HomePageContent extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.all(12.0),
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
           SizedBox(height: 16),
           Container(
@@ -188,7 +201,7 @@ class HomePageContent extends StatelessWidget {
               borderRadius: BorderRadius.circular(12),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.grey.withOpacity(0.2),
+                  color: Colors.grey.withOpacity(0.6),
                   spreadRadius: 4,
                   blurRadius: 6,
                   offset: Offset(0, 3),
@@ -196,6 +209,7 @@ class HomePageContent extends StatelessWidget {
               ],
             ),
             child: Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -210,19 +224,20 @@ class HomePageContent extends StatelessWidget {
                     ),
                     Column(
                       children: [
-                        Text('Devils Arena Stadium',
+                        Icon(Icons.stadium, color: Colors.grey, size: 18),
+                        Text('Estádio da Luz',
                             style: TextStyle(color: Colors.grey, fontSize: 10)),
                         Text('19.45',
                             style: TextStyle(
-                                fontSize: 24, fontWeight: FontWeight.bold)),
-                        Text('9 May 2021',
+                                color: Colors.orange, fontSize: 26, fontWeight: FontWeight.bold)),
+                        Text('28 Março 2025',
                             style: TextStyle(color: Colors.grey, fontSize: 10)),
                       ],
                     ),
                     Column(
                       children: [
                         Image.asset('assets/images/logo_green.png', height: 40),
-                        Text('GreenTeam',
+                        Text('Victory G.',
                             style: TextStyle(
                                 fontWeight: FontWeight.bold, fontSize: 12)),
                       ],
@@ -231,7 +246,7 @@ class HomePageContent extends StatelessWidget {
                 ),
                 SizedBox(height: 16),
                 Text(
-                  'Match Countdown',
+                  'Próximo jogo',
                   style: TextStyle(
                       color: Colors.grey,
                       fontWeight: FontWeight.bold,
@@ -249,6 +264,15 @@ class HomePageContent extends StatelessWidget {
                 ),
               ],
             ),
+          ),
+          SizedBox(height: 16),
+          // Coluna com os botões um em cima do outro
+          Column(
+            children: [
+              _buildSmallButton(context, 'AGENDA', AgendaScreen()),
+              SizedBox(height: 8),
+              _buildSmallButton(context, 'ATLETAS', ConsultarAtletaScreen()),
+            ],
           ),
         ],
       ),
@@ -273,6 +297,25 @@ class HomePageContent extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildSmallButton(BuildContext context, String text, Widget targetScreen) {
+    return ElevatedButton(
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Colors.black,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        minimumSize: Size(200, 45),
+      ),
+      onPressed: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => targetScreen),
+        );
+      },
+      child: Text(text, style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
     );
   }
 }
