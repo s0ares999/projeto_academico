@@ -26,7 +26,7 @@ class _LoginScreenState extends State<LoginScreen> {
     final String username = _usernameController.text;
     final String password = _passwordController.text;
 
-    if (username == 'pedro@gmail.com' && password == '123') {
+    if (username == 'user' && password == '123') {
       // Credenciais corretas, navega para a HomeScreen
       Navigator.pushReplacement(
         context,
@@ -63,7 +63,7 @@ class _LoginScreenState extends State<LoginScreen> {
       body: SingleChildScrollView( // Adicione o SingleChildScrollView aqui
         child: Padding(
           padding: const EdgeInsets.all(16.0),
-          child: Form(
+          child: Form(...................
             key: _formKey,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
