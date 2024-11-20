@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'home_screen.dart'; // Importa a tela HomeScreen
-import 'forgotpassword_screen.dart'; // Importa a esqueceu password
+import 'forgotpassword_screen.dart'; // Importa a tela Esqueceu Senha
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -128,21 +128,24 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 const SizedBox(height: 20),
                 Center(
-                  child: ElevatedButton(
-                    onPressed: () {
-                      if (_formKey.currentState!.validate()) {
-                        _login();
-                      }
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color.fromARGB(218, 210, 210, 210),
-                      padding: const EdgeInsets.symmetric(horizontal: 150, vertical: 16),
-                      textStyle: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
+                  child: SizedBox(
+                    width: MediaQuery.of(context).size.width * 0.8, // 80% da largura da tela
+                    child: ElevatedButton(
+                      onPressed: () {
+                        if (_formKey.currentState!.validate()) {
+                          _login();
+                        }
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color.fromARGB(218, 210, 210, 210),
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        textStyle: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
+                      child: const Text('Entrar', style: TextStyle(color: Colors.black)),
                     ),
-                    child: const Text('Entrar', style: TextStyle(color: Colors.black)),
                   ),
                 ),
                 const SizedBox(height: 16),

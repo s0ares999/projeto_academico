@@ -85,7 +85,7 @@ class _HomeLoginScreenState extends State<HomeLoginScreen> {
                 children: [
                Theme(
                   data: Theme.of(context).copyWith(
-                    unselectedWidgetColor: Colors.orange, // Borda laranja para o estado não selecionado
+                    unselectedWidgetColor: Colors.orange, 
                   ),
                   child: Radio<String>(
                     value: 'accept_terms',
@@ -95,7 +95,7 @@ class _HomeLoginScreenState extends State<HomeLoginScreen> {
                         selectedValue = value;
                       });
                     },
-                    activeColor: Colors.orange, // Cor de preenchimento quando selecionado
+                    activeColor: Colors.orange, 
                   ),
                 ),
                   const Text.rich(
