@@ -1,18 +1,24 @@
-// server.js
 const express = require('express');
-const db = require('./models'); // Importa os models
+const { sequelize } = require('./config/database'); // Importando o sequelize corretamente
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-require('dotenv').config(); // Carrega as variáveis de ambiente
+app.listen(PORT, () => {
+  console.log(`Servidor rodando na porta ${PORT}`);
+});
 
 // Middleware
 app.use(express.json());
 
 // Testar a conexão com o banco de dados
-db.sequelize.authenticate()
-  .then(() => console.log('Conectado ao PostgreSQL'))
-  .catch(err => console.error('Erro ao conectar ao PostgreSQL:', err));
+sequelize.authenticate()
+  .then(() => {
+    console.log('Conectado ao PostgreSQL');
+  })
+  .catch(err => {
+    console.error('Erro ao conectar ao PostgreSQL:', err);
+  });
 
 // Rotas
 app.get('/', (req, res) => {

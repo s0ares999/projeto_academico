@@ -9,7 +9,7 @@ class CriarAtletaScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: const Color.fromARGB(0, 255, 255, 255),
-        title: const Text('CRIAR ATLETA'),
+        title: const Text('CRIAR ATLETA', style: TextStyle(fontWeight: FontWeight.bold)),
         centerTitle: true,
         elevation: 0,
       ),

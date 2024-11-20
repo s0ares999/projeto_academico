@@ -21,14 +21,8 @@ class MyApp extends StatelessWidget {
       builder: (context, themeNotifier, child) {
         return MaterialApp(
           title: 'Académico de Viseu',
-          theme: ThemeData(
-            primarySwatch: Colors.blue,
-            brightness: Brightness.light, // Tema claro
-          ),
-          darkTheme: ThemeData(
-            primarySwatch: Colors.orange, // Tema escuro
-            brightness: Brightness.dark,
-          ),
+          theme: themeNotifier.themeData, // Usa o tema dinâmico baseado no ThemeNotifier
+          darkTheme: themeNotifier.themeData, // Usa o mesmo tema para o modo escuro
           themeMode: themeNotifier.isDarkMode ? ThemeMode.dark : ThemeMode.light, // Alterna entre os temas
           home: const SplashScreen(), // Definindo a SplashScreen como tela inicial
         );

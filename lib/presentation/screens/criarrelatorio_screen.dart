@@ -23,7 +23,7 @@ class _CriarRelatorioScreenState extends State<CriarRelatorioScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Criar Relatório'),
+        title: Text('Criar Relatório', style: TextStyle(fontWeight: FontWeight.bold)),
         backgroundColor: Colors.white,
       ),
       body: Padding(
