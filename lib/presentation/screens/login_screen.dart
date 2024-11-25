@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'home_screen.dart'; // Importa a tela HomeScreen
-import 'forgotpassword_screen.dart'; // Importa a nova tela
+import 'forgotpassword_screen.dart'; // Importa a tela Esqueceu Senha
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -13,6 +13,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  bool _isPasswordVisible = false; // Controla a visibilidade da palavra-passe
 
   @override
   void dispose() {
@@ -26,20 +27,19 @@ class _LoginScreenState extends State<LoginScreen> {
     final String username = _usernameController.text;
     final String password = _passwordController.text;
 
-    if (username == 'teste' && password == 'teste') {
+    if (username == 'user' && password == '123') {
       // Credenciais corretas, navega para a HomeScreen
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => const HomeScreen()),
       );
     } else {
-      // Credenciais incorretas, mostra um diálogo de erro
+      // Credenciais incorretas
       showDialog(
         context: context,
         builder: (context) {
           return AlertDialog(
-            title: const Text('Erro de login'),
-            content: const Text('Nome de utilizador ou palavra-passe incorretos.'),
+            title: const Text('Nome de utilizador ou palavra-passe incorretos'),
             actions: [
               TextButton(
                 onPressed: () {
@@ -60,7 +60,7 @@ class _LoginScreenState extends State<LoginScreen> {
       appBar: AppBar(
         elevation: 0,
       ),
-      body: SingleChildScrollView( // Adicione o SingleChildScrollView aqui
+      body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Form(
@@ -68,25 +68,26 @@ class _LoginScreenState extends State<LoginScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Center(
-                  child: Image.asset(
-                    'assets/images/logoacademico.png',
-                    height: 100,
-                  ),
-                ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 130),
                 const Text(
                   'Login',
                   style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
+                    color: Color.fromARGB(218, 180, 178, 178),
                   ),
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 50),
                 TextFormField(
                   controller: _usernameController,
                   decoration: const InputDecoration(
                     hintText: 'Nome de utilizador',
+                    enabledBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(color: Color.fromARGB(218, 180, 178, 178)),
+                    ),
+                    focusedBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(color: Color.fromARGB(255, 237, 172, 43)),
+                    ),
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
@@ -95,13 +96,28 @@ class _LoginScreenState extends State<LoginScreen> {
                     return null;
                   },
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 46),
                 TextFormField(
                   controller: _passwordController,
-                  obscureText: true,
-                  decoration: const InputDecoration(
+                  obscureText: !_isPasswordVisible,
+                  decoration: InputDecoration(
                     hintText: 'Palavra-passe',
-                    suffixIcon: Icon(Icons.visibility_off),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          _isPasswordVisible = !_isPasswordVisible;
+                        });
+                      },
+                    ),
+                    enabledBorder: const UnderlineInputBorder(
+                      borderSide: BorderSide(color: Color.fromARGB(218, 180, 178, 178)),
+                    ),
+                    focusedBorder: const UnderlineInputBorder(
+                      borderSide: BorderSide(color: Color.fromARGB(255, 237, 172, 43)),
+                    ),
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
@@ -112,21 +128,24 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 const SizedBox(height: 20),
                 Center(
-                  child: ElevatedButton(
-                    onPressed: () {
-                      if (_formKey.currentState!.validate()) {
-                        _login();
-                      }
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.black,
-                      padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 16),
-                      textStyle: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
+                  child: SizedBox(
+                    width: MediaQuery.of(context).size.width * 0.8, // 80% da largura da tela
+                    child: ElevatedButton(
+                      onPressed: () {
+                        if (_formKey.currentState!.validate()) {
+                          _login();
+                        }
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color.fromARGB(218, 210, 210, 210),
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        textStyle: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
+                      child: const Text('Entrar', style: TextStyle(color: Colors.black)),
                     ),
-                    child: const Text('Entrar', style: TextStyle(color: Colors.white)),
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -143,10 +162,11 @@ class _LoginScreenState extends State<LoginScreen> {
                       );
                     },
                     child: const Text(
-                      'Esqueceu a palavra-passe?',
+                      'Esqueci-me da palavra-passe',
                       style: TextStyle(
-                        color: Color.fromARGB(255, 255, 175, 14),
+                        color: Color.fromARGB(255, 237, 172, 43),
                         fontSize: 16,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
                   ),
