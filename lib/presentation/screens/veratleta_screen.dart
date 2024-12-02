@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:pi4_academico/presentation/screens/veratleta_screen.dart';
+import 'package:pi4_academico/presentation/screens/criarrelatorio_screen.dart';
 
-class CriarAtletaScreen extends StatelessWidget {
-  const CriarAtletaScreen({super.key});
+class VeratletaScreen extends StatelessWidget {
+  const VeratletaScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: const Color.fromARGB(0, 255, 255, 255),
-        title: const Text('CRIAR ATLETA', style: TextStyle(fontWeight: FontWeight.bold)),
+        title: const Text('Atleta', style: TextStyle(fontWeight: FontWeight.bold)),
         centerTitle: true,
         elevation: 0,
       ),
@@ -20,18 +20,20 @@ class CriarAtletaScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Formulário de criação de atleta
-              buildTextField('Nome do atleta', '|'),
+              buildTextField('Nome completo', 'Inês Fernandes'),
               const SizedBox(height: 30),
-              buildTextField('Data e ano de nascimento', '|'),
+              buildTextField('Data e ano de nascimento', '01/08/2003'),
               const SizedBox(height: 30),
-              buildTextField('Clube', '|'),
+              buildTextField('Clube', 'Benfica'),
               const SizedBox(height: 30),
-              buildTextField('Posição', '|'),
+              buildTextField('Posição', 'Avançado'),
               const SizedBox(height: 30),
-              buildTextField('Nacionalidade', '|'),
+              buildTextField('Nacionalidade', 'Portuguesa'),
+              const SizedBox(height: 30),
+              buildTextField('Encarregado de educação/agente', 'Sra.'),
               const SizedBox(height: 30),
 
-              // Botão para Criar atleta
+              // Botão para Criar relatorio
               Center(
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
@@ -46,11 +48,11 @@ class CriarAtletaScreen extends StatelessWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => const VeratletaScreen ()),
+                          builder: (context) => const CriarRelatorioScreen ()),
                     );
                   },
                   child: const Text(
-                    'Criar',
+                    'Criar relatório',
                     style: TextStyle(fontSize: 16, color: Colors.white),
                   ),
                 ),
@@ -82,32 +84,32 @@ class CriarAtletaScreen extends StatelessWidget {
               decoration: InputDecoration(
                 hintText: placeholder,
                 hintStyle: const TextStyle(
-                  color: Color.fromARGB(255, 188, 188, 188), // Texto placeholder cinza claro
+                  color: Color.fromARGB(255, 0, 0, 0), // Texto placeholder cinza claro
                 ),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
                   borderSide: const BorderSide(
-                    color: Color.fromARGB(255, 187, 187, 187), // Cor do contorno cinza claro
+                    color: Color.fromARGB(255, 139, 139, 139), // Cor do contorno cinza claro
                     width: 1.0,
                   ),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
                   borderSide: const BorderSide(
-                    color: Color.fromARGB(255, 171, 171, 171), // Contorno cinza claro quando inativo
+                    color: Color.fromARGB(255, 0, 0, 0), // Contorno cinza claro quando inativo
                     width: 1.0,
                   ),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
                   borderSide: const BorderSide(
-                    color: Color.fromARGB(255, 172, 172, 172), // Contorno preto ao focar
+                    color: Color.fromARGB(255, 0, 0, 0), // Contorno preto ao focar
                     width: 1.5,
                   ),
                 ),
               ),
               style: const TextStyle(
-                color: Colors.grey, // Texto do campo em cinza claro
+                color: Color.fromARGB(255, 0, 0, 0), // Texto do campo em cinza claro
               ),
             ),
           ),

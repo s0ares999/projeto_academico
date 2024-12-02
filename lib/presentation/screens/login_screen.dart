@@ -27,7 +27,7 @@ class _LoginScreenState extends State<LoginScreen> {
     final String username = _usernameController.text;
     final String password = _passwordController.text;
 
-    if (username == 'user' && password == '123') {
+    if (username == 'teste' && password == 'teste') {
       // Credenciais corretas, navega para a HomeScreen
       Navigator.pushReplacement(
         context,
