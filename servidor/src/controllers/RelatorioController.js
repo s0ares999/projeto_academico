@@ -5,17 +5,12 @@ const Utilizador = require('../models/Utilizadores'); // Modelo de Utilizador
 // Listar todos os relatórios com os dados do atleta e do utilizador (scoutId)
 exports.getAllRelatorios = async (req, res) => {
     try {
-        console.log('Buscando relatórios...');
-        
         const relatorios = await Relatorio.findAll({
             include: [
                 { model: Atleta, as: 'atleta' }, // Relacionamento com Atleta
                 { model: Utilizador, as: 'utilizador' }, // Relacionamento com Utilizador (scoutId)
             ],
         });
-
-        console.log('Relatórios encontrados:', relatorios);
-
         res.json(relatorios);
     } catch (error) {
         console.error('Erro ao buscar relatórios:', error);
@@ -23,35 +18,35 @@ exports.getAllRelatorios = async (req, res) => {
     }
 };
 
-// Criar um novo relatório (salvando scoutId)
+// Criar um novo relatório e associar ao atleta
 exports.createRelatorio = async (req, res) => {
-    const { tecnica, velocidade, atitudeCompetitiva, inteligencia, altura, morfologia, ratingFinal, comentario, atletaNome, scoutId, status } = req.body;
+    const { tecnica, velocidade, atitudeCompetitiva, inteligencia, altura, morfologia, ratingFinal, comentario, atletaId, scoutId, status } = req.body;
 
     try {
-        // Busca o atleta pelo nome
-        const atleta = await Atleta.findOne({ where: { nome: atletaNome } });
+        // Verifica se o atleta existe
+        const atleta = await Atleta.findByPk(atletaId);
         if (!atleta) {
             return res.status(404).json({ error: 'Atleta não encontrado.' });
         }
 
         // Cria o relatório usando o ID do atleta e o scoutId
-        const novoRelatorio = await Relatorio.create({ 
-            tecnica, 
-            velocidade, 
-            atitudeCompetitiva, 
-            inteligencia, 
-            altura, 
-            morfologia, 
-            ratingFinal, 
-            comentario, 
-            atletaId: atleta.id, // Usando o ID do atleta
-            scoutId, // Salvando o scoutId (userId) no campo scoutid
-            status: status || 'Pendente' // Define o status ou usa 'Pendente' como padrão
+        const novoRelatorio = await Relatorio.create({
+            tecnica,
+            velocidade,
+            atitudeCompetitiva,
+            inteligencia,
+            altura,
+            morfologia,
+            ratingFinal,
+            comentario,
+            atletaId,
+            scoutId,
+            status: status || 'Pendente',
         });
 
         res.status(201).json(novoRelatorio);
     } catch (error) {
-        console.error(error);
+        console.error('Erro ao criar relatório:', error);
         res.status(500).json({ error: 'Erro ao criar relatório.' });
     }
 };
@@ -74,7 +69,7 @@ exports.getRelatorioById = async (req, res) => {
 
         res.json(relatorio);
     } catch (error) {
-        console.error(error);
+        console.error('Erro ao buscar relatório:', error);
         res.status(500).json({ error: 'Erro ao buscar relatório.' });
     }
 };
@@ -90,22 +85,21 @@ exports.updateRelatorio = async (req, res) => {
             return res.status(404).json({ error: 'Relatório não encontrado.' });
         }
 
-        // Atualiza o relatório com os novos dados
-        await relatorio.update({ 
-            tecnica, 
-            velocidade, 
-            atitudeCompetitiva, 
-            inteligencia, 
-            altura, 
-            morfologia, 
-            ratingFinal, 
-            comentario, 
-            status // Permite atualizar o status também
+        await relatorio.update({
+            tecnica,
+            velocidade,
+            atitudeCompetitiva,
+            inteligencia,
+            altura,
+            morfologia,
+            ratingFinal,
+            comentario,
+            status,
         });
 
         res.json(relatorio);
     } catch (error) {
-        console.error(error);
+        console.error('Erro ao atualizar relatório:', error);
         res.status(500).json({ error: 'Erro ao atualizar relatório.' });
     }
 };
@@ -121,9 +115,9 @@ exports.deleteRelatorio = async (req, res) => {
         }
 
         await relatorio.destroy();
-        res.status(204).send(); // Retorna 204 No Content
+        res.status(204).send();
     } catch (error) {
-        console.error(error);
+        console.error('Erro ao deletar relatório:', error);
         res.status(500).json({ error: 'Erro ao deletar relatório.' });
     }
 };
@@ -132,31 +126,27 @@ exports.deleteRelatorio = async (req, res) => {
 exports.getRelatoriosPendentes = async (req, res) => {
     try {
         const relatoriosPendentes = await Relatorio.findAll({
-            where: { status: 'Pendente' }, // Filtra relatórios com status 'Pendente'
-            include: [
-                { model: Atleta, as: 'atleta' }, // Inclui os dados do Atleta
-            ],
+            where: { status: 'Pendente' },
+            include: [{ model: Atleta, as: 'atleta' }],
         });
 
         res.json(relatoriosPendentes);
     } catch (error) {
-        console.error(error);
+        console.error('Erro ao buscar relatórios pendentes:', error);
         res.status(500).json({ error: 'Erro ao buscar relatórios pendentes.' });
     }
 };
 
+// Listar relatórios por atletaId
 exports.getRelatoriosByAtletaId = async (req, res) => {
-    const { atletaId } = req.params;  // Obtém o id do atleta a partir da URL
+    const { atletaId } = req.params;
 
     try {
-        // Busca todos os relatórios associados ao atleta com o atletaId
         const relatorios = await Relatorio.findAll({
-            where: {
-                atletaId: atletaId,  // Filtra os relatórios pelo atletaId
-            },
+            where: { atletaId },
             include: [
-                { model: Atleta, as: 'atleta' },  // Inclui os dados do Atleta
-                { model: Utilizador, as: 'utilizador' },  // Inclui os dados do Utilizador (scoutId)
+                { model: Atleta, as: 'atleta' },
+                { model: Utilizador, as: 'utilizador' },
             ],
         });
 
@@ -164,9 +154,9 @@ exports.getRelatoriosByAtletaId = async (req, res) => {
             return res.status(404).json({ error: 'Nenhum relatório encontrado para este atleta.' });
         }
 
-        res.json(relatorios);  // Retorna os relatórios encontrados
+        res.json(relatorios);
     } catch (error) {
-        console.error(error);
+        console.error('Erro ao buscar relatórios do atleta:', error);
         res.status(500).json({ error: 'Erro ao buscar relatórios do atleta.' });
     }
 };

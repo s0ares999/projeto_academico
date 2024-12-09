@@ -16,7 +16,7 @@ const partidaRoutes = require('./routes/partidaRoutes'); // ajuste o caminho con
 
 
 // Configurações
-app.set('port', process.env.PORT || 3000);
+app.set('port', process.env.PORT || 4000);//
 
 // Middlewares
 app.use(express.json());

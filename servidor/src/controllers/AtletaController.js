@@ -1,38 +1,80 @@
-const Atleta = require('../models/Atleta'); // ajuste o caminho conforme necessário
-const Time = require('../models/Time'); // ajuste o caminho conforme necessário
+const Atleta = require('../models/Atleta');
+const Time = require('../models/Time');
+const { parse, isValid } = require('date-fns'); // Certifique-se de ter o pacote date-fns instalado
 
-// Criar um novo atleta
-exports.createAtleta = async (req, res) => {
-    const { nome, dataNascimento, ano, nacionalidade, posicao, clube, link, agente, contactoAgente } = req.body;
+// Constantes para os status do atleta
+const STATUSES = {
+    PENDENTE: 'pendente',
+    APROVADO: 'aprovado',
+    REJEITADO: 'rejeitado',
+    DESATIVADO: 'desativado'
+};
+
+// Função auxiliar para buscar atleta por ID
+const getAtletaByIdHelper = async (id) => {
     try {
-        const time = await Time.findOne({ where: { nome: clube } });
-        if (!time || time.status !== 'aprovado') {
-            return res.status(400).json({ error: 'Time não encontrado ou não aprovado.' });
-        }
-        const novoAtleta = await Atleta.create({ 
-            nome, 
-            dataNascimento, 
-            ano, 
-            nacionalidade, 
-            posicao, 
-            clube, 
-            link, 
-            agente, 
-            contactoAgente, 
-            timeId: time.id, 
-            status: 'pendente' // Define o status inicial como 'pendente'
-        });
-        res.status(201).json(novoAtleta);
+        return await Atleta.findByPk(id, { include: [Time] });
     } catch (error) {
-        res.status(500).json({ error: 'Erro ao criar atleta' });
+        console.error('Erro ao buscar atleta por ID:', error);
+        throw error;
     }
 };
 
-// Função para atualizar o status do atleta
+// Criar um novo atleta
+exports.createAtleta = async (req, res) => {
+    const { nome, dataNascimento, nacionalidade, posicao, clube, link, agente, contactoAgente } = req.body;
+
+    // Validar e calcular o campo 'ano'
+    const parsedDate = parse(dataNascimento, 'd/M/yyyy', new Date());
+    if (!isValid(parsedDate)) {
+        return res.status(400).json({
+            error: true,
+            message: 'Data de nascimento inválida. Use o formato correto (dia/mês/ano).'
+        });
+    }
+    const ano = parsedDate.getFullYear();
+
+    try {
+        // Buscar o time pelo ID
+        const time = await Time.findOne({ where: { id: clube } });
+
+        if (!time) {
+            return res.status(400).json({ error: true, message: 'Time não encontrado.' });
+        }
+
+        if (time.status.toLowerCase() !== 'aprovado') {
+            return res.status(400).json({ error: true, message: 'O time não está aprovado.' });
+        }
+
+        const novoAtleta = await Atleta.create({
+            nome,
+            dataNascimento: parsedDate,
+            ano,
+            nacionalidade,
+            posicao,
+            clube: time.nome, // Armazena o nome do time
+            link,
+            agente,
+            contactoAgente,
+            timeId: time.id,
+            status: STATUSES.PENDENTE,
+        });
+
+        res.status(201).json({
+            message: 'Atleta criado com sucesso.',
+            data: novoAtleta,
+        });
+    } catch (error) {
+        console.error('Erro ao criar atleta:', error);
+        res.status(500).json({ error: true, message: 'Erro ao criar atleta.' });
+    }
+};
+
+// Atualizar status do atleta
 const updateAtletaStatus = async (req, res, status) => {
     const { id } = req.params;
     try {
-        const atleta = await Atleta.findByPk(id);
+        const atleta = await getAtletaByIdHelper(id);
         if (atleta) {
             atleta.status = status;
             await atleta.save();
@@ -41,35 +83,40 @@ const updateAtletaStatus = async (req, res, status) => {
             res.status(404).json({ error: 'Atleta não encontrado' });
         }
     } catch (error) {
+        console.error('Erro ao atualizar status do atleta:', error);
         res.status(500).json({ error: 'Erro ao atualizar status do atleta' });
     }
 };
 
 // Aprovar atleta
 exports.aprovarAtleta = (req, res) => {
-    updateAtletaStatus(req, res, 'aprovado');
+    updateAtletaStatus(req, res, STATUSES.APROVADO);
 };
 
 // Rejeitar atleta
 exports.rejeitarAtleta = (req, res) => {
-    updateAtletaStatus(req, res, 'rejeitado');
+    updateAtletaStatus(req, res, STATUSES.REJEITADO);
 };
 
 // Colocar atleta como pendente
 exports.pendenteAtleta = (req, res) => {
-    updateAtletaStatus(req, res, 'pendente');
+    updateAtletaStatus(req, res, STATUSES.PENDENTE);
 };
 
+// Desativar atleta
 exports.desativarAtleta = (req, res) => {
-    updateAtletaStatus(req, res, 'desativado');
+    updateAtletaStatus(req, res, STATUSES.DESATIVADO);
 };
 
 // Mostrar todos os atletas
 exports.getAllAtletas = async (req, res) => {
     try {
-        const atletas = await Atleta.findAll({ include: [Time] });
+        const atletas = await Atleta.findAll({
+            include: [Time]
+        });
         res.json(atletas);
     } catch (error) {
+        console.error('Erro ao buscar atletas:', error);
         res.status(500).json({ error: 'Erro ao buscar atletas' });
     }
 };
@@ -78,13 +125,14 @@ exports.getAllAtletas = async (req, res) => {
 exports.getAtletaById = async (req, res) => {
     const { id } = req.params;
     try {
-        const atleta = await Atleta.findByPk(id, { include: [Time] });
+        const atleta = await getAtletaByIdHelper(id);
         if (atleta) {
             res.json(atleta);
         } else {
             res.status(404).json({ error: 'Atleta não encontrado' });
         }
     } catch (error) {
+        console.error('Erro ao buscar atleta por ID:', error);
         res.status(500).json({ error: 'Erro ao buscar atleta' });
     }
 };
@@ -93,25 +141,28 @@ exports.getAtletaById = async (req, res) => {
 exports.updateAtleta = async (req, res) => {
     const { id } = req.params;
     const { nome, dataNascimento, ano, nacionalidade, posicao, clube, link, agente, contactoAgente, timeId } = req.body;
+
     try {
-        const atleta = await Atleta.findByPk(id);
+        const atleta = await getAtletaByIdHelper(id);
         if (atleta) {
-            atleta.nome = nome;
-            atleta.dataNascimento = dataNascimento;
-            atleta.ano = ano;
-            atleta.nacionalidade = nacionalidade;
-            atleta.posicao = posicao;
-            atleta.clube = clube;
-            atleta.link = link;
-            atleta.agente = agente;
-            atleta.contactoAgente = contactoAgente;
-            atleta.timeId = timeId;
+            if (nome) atleta.nome = nome;
+            if (dataNascimento) atleta.dataNascimento = parse(dataNascimento, 'd/M/yyyy', new Date());
+            if (ano) atleta.ano = ano;
+            if (nacionalidade) atleta.nacionalidade = nacionalidade;
+            if (posicao) atleta.posicao = posicao;
+            if (clube) atleta.clube = clube;
+            if (link) atleta.link = link;
+            if (agente) atleta.agente = agente;
+            if (contactoAgente) atleta.contactoAgente = contactoAgente;
+            if (timeId) atleta.timeId = timeId;
+
             await atleta.save();
             res.json(atleta);
         } else {
             res.status(404).json({ error: 'Atleta não encontrado' });
         }
     } catch (error) {
+        console.error('Erro ao atualizar atleta:', error);
         res.status(500).json({ error: 'Erro ao atualizar atleta' });
     }
 };
@@ -120,7 +171,7 @@ exports.updateAtleta = async (req, res) => {
 exports.deleteAtleta = async (req, res) => {
     const { id } = req.params;
     try {
-        const atleta = await Atleta.findByPk(id);
+        const atleta = await getAtletaByIdHelper(id);
         if (atleta) {
             await atleta.destroy();
             res.status(204).send();
@@ -128,6 +179,7 @@ exports.deleteAtleta = async (req, res) => {
             res.status(404).json({ error: 'Atleta não encontrado' });
         }
     } catch (error) {
+        console.error('Erro ao apagar atleta:', error);
         res.status(500).json({ error: 'Erro ao apagar atleta' });
     }
 };
