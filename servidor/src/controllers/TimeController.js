@@ -1,21 +1,12 @@
 const Time = require('../models/Time'); // Ajuste conforme o caminho do modelo
-const Atleta = require('../models/Atleta'); // Ajuste conforme o caminho do modelo
-
-// Definindo constantes para os status do time
-const STATUSES = {
-    APROVADO: 'aprovado',
-    REJEITADO: 'rejeitado',
-    DESATIVADO: 'desativado'
-};
+const Jogador = require('../models/Atleta'); // Ajuste conforme o seu modelo de Jogador
 
 // Criar um novo time
 exports.createTime = async (req, res) => {
     const { nome, pais, categoria, descricao } = req.body;
     try {
-        // Verifica se já existe um time com o mesmo nome, considerando a capitalização
-        const timeExistente = await Time.findOne({
-            where: { nome: nome.toLowerCase() }
-        });
+        // Verifica se já existe um time com o mesmo nome
+        const timeExistente = await Time.findOne({ where: { nome } });
         if (timeExistente) {
             return res.status(400).json({ error: 'Já existe um time com esse nome.' });
         }
@@ -46,7 +37,7 @@ exports.getTimeById = async (req, res) => {
     const { id } = req.params;
     try {
         const time = await Time.findByPk(id, {
-            include: [{ model: Atleta, as: 'jogadores' }] // Inclui jogadores, caso haja relação
+            include: [{ model: Jogador, as: 'jogadores' }] // Inclui jogadores, caso haja relação
         });
         if (time) {
             res.status(200).json(time);
@@ -105,7 +96,7 @@ exports.approveTime = async (req, res) => {
     try {
         const time = await Time.findByPk(id);
         if (time) {
-            time.status = STATUSES.APROVADO; // Atualiza o status para "aprovado"
+            time.status = 'aprovado'; // Atualiza o status para "aprovado"
             await time.save();
             res.status(200).json({
                 message: 'Time aprovado com sucesso!',
@@ -125,7 +116,7 @@ exports.rejectTime = async (req, res) => {
     try {
         const time = await Time.findByPk(id);
         if (time) {
-            time.status = STATUSES.REJEITADO; // Atualiza o status para "rejeitado"
+            time.status = 'rejeitado'; // Atualiza o status para "rejeitado"
             await time.save();
             res.status(200).json({
                 message: 'Time rejeitado com sucesso!',
@@ -145,7 +136,7 @@ exports.deactivateTime = async (req, res) => {
     try {
         const time = await Time.findByPk(id);
         if (time) {
-            time.status = STATUSES.DESATIVADO; // Atualiza o status para "desativado"
+            time.status = 'desativado'; // Atualiza o status para "desativado"
             await time.save();
             res.status(200).json({
                 message: 'Time desativado com sucesso!',
@@ -163,7 +154,7 @@ exports.deactivateTime = async (req, res) => {
 exports.getJogadoresByTimeId = async (req, res) => {
     const { timeId } = req.params;
     try {
-        const jogadores = await Atleta.findAll({ where: { timeId } });
+        const jogadores = await Jogador.findAll({ where: { timeId } });
         if (jogadores.length > 0) {
             res.status(200).json(jogadores);
         } else {
