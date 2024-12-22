@@ -23,7 +23,7 @@ class _ConsultarAtletaScreenState extends State<ConsultarAtletaScreen> {
   }
 
 Future<void> _fetchAthletes() async {
-  const String url = 'http://192.168.242.48:4000/atletas'; // Adicione "http://" para uma URL válida
+  const String url = 'http://192.168.8.135:4000/atletas'; // Adicione "http://" para uma URL válida
   try {
     final response = await http.get(Uri.parse(url));
 

@@ -67,6 +67,8 @@ class _CriarAtletaScreenState extends State<CriarAtletaScreen> {
       'contactoAgente': _contactoAgenteController.text.trim(),
     };
 
+    print('Enviando dados do atleta: $dadosAtleta');
+
     try {
       final response = await http.post(
         Uri.parse(url),
@@ -74,20 +76,22 @@ class _CriarAtletaScreenState extends State<CriarAtletaScreen> {
         body: jsonEncode(dadosAtleta),
       );
 
+      print('Status Code: ${response.statusCode}');
+      print('Response Body: ${response.body}');
+
       if (response.statusCode == 201) {
-        final responseData = jsonDecode(response.body);
         showDialog(
           context: context,
           builder: (BuildContext context) {
             return AlertDialog(
               title: const Text('Sucesso'),
-              content: Text(
-                  'Atleta criado com sucesso! ${responseData['mensagem'] ?? 'Ele está pendente de aprovação.'}'),
+              content: const Text(
+                  'O atleta foi criado com sucesso e está aguardando aprovação de um administrador.'),
               actions: [
                 TextButton(
                   onPressed: () {
-                    Navigator.of(context).pop();
-                    Navigator.pop(context, dadosAtleta);
+                    Navigator.of(context).pop(); // Fecha o diálogo
+                    Navigator.pop(context, dadosAtleta); // Fecha a tela atual
                   },
                   child: const Text('OK'),
                 ),
@@ -101,7 +105,8 @@ class _CriarAtletaScreenState extends State<CriarAtletaScreen> {
             'Erro ao criar atleta: ${errorData['mensagem'] ?? 'Erro desconhecido.'}');
       }
     } catch (e) {
-      _showErrorDialog('Erro de conexão: ${e.toString()}');
+      print('Erro ao criar atleta: $e');
+      _showErrorDialog('Erro de conexão: $e');
     }
   }
 
