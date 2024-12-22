@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class ConsultarAtletaScreen extends StatefulWidget {
   const ConsultarAtletaScreen({super.key});
@@ -8,33 +10,66 @@ class ConsultarAtletaScreen extends StatefulWidget {
 }
 
 class _ConsultarAtletaScreenState extends State<ConsultarAtletaScreen> {
-  final List<Map<String, dynamic>> athletes = [
-    {'name': 'Pedro Soares', 'year': 2002, 'rating': 4, 'club': 'Clube A', 'position': 'Atacante'},
-    {'name': 'Hiago Freitas', 'year': 1999, 'rating': 3, 'club': 'Clube B', 'position': 'Meio-campo'},
-    {'name': 'Inês Fernandes', 'year': 2003, 'rating': 5, 'club': 'Clube A', 'position': 'Defensora'},
-    {'name': 'Maria Bernardo', 'year': 2003, 'rating': 2, 'club': 'Clube C', 'position': 'Atacante'},
-    {'name': 'Margarida Santos', 'year': 2003, 'rating': 3, 'club': 'Clube B', 'position': 'Meio-campo'},
-  ];
-
+  List<Map<String, dynamic>> athletes = [];
   final List<String> filters = ["Ano", "Posição", "Clube", "Rating"];
   int selectedFilter = 0;
-  int selectedRating = 3; // Valor padrão para evitar null
-  String selectedPosition = ''; // Para armazenar a posição selecionada
+  int selectedRating = 3;
+  String selectedPosition = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchAthletes(); // Busca os atletas ao inicializar a página
+  }
+
+Future<void> _fetchAthletes() async {
+  const String url = 'http://192.168.242.48:4000/atletas'; // Adicione "http://" para uma URL válida
+  try {
+    final response = await http.get(Uri.parse(url));
+
+    if (response.statusCode == 200) {
+      // Decodificar a resposta do servidor
+      final List<dynamic> decodedData = json.decode(response.body);
+
+      // Atualizar o estado com os dados
+      setState(() {
+        athletes = List<Map<String, dynamic>>.from(decodedData);
+      });
+    } else {
+      // Exibir uma mensagem de erro caso a resposta não seja 200
+      _showErrorDialog('Erro ao carregar atletas. Código: ${response.statusCode}');
+    }
+  } catch (e) {
+    // Tratar erros de conexão ou outros problemas
+    _showErrorDialog('Erro de conexão: ${e.toString()}');
+  }
+}
+
+
+  void _showErrorDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Erro'),
+          content: Text(message),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
+  }
 
   void _sortAthletes(String criterion) {
     setState(() {
       if (criterion == 'Ano') {
-        athletes.sort((a, b) {
-          int yearA = a['year'] ?? 0;
-          int yearB = b['year'] ?? 0;
-          return yearA.compareTo(yearB);
-        });
+        athletes.sort((a, b) => (a['data_nascimento'] ?? '').compareTo(b['data_nascimento'] ?? ''));
       } else if (criterion == 'Clube') {
-        athletes.sort((a, b) {
-          String clubA = a['club'] ?? '';
-          String clubB = b['club'] ?? '';
-          return clubA.compareTo(clubB);
-        });
+        athletes.sort((a, b) => (a['clube'] ?? '').compareTo(b['clube'] ?? ''));
       }
     });
   }
@@ -48,16 +83,15 @@ class _ConsultarAtletaScreenState extends State<ConsultarAtletaScreen> {
 
     return Column(
       children: [
-        // Lista de botões de posição
         GridView.builder(
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 3,  // Três colunas para os botões
+            crossAxisCount: 3,
             crossAxisSpacing: 10.0,
             mainAxisSpacing: 10.0,
           ),
           itemCount: positions.length,
-          shrinkWrap: true, // Impede que a lista ocupe espaço excessivo
-          physics: const NeverScrollableScrollPhysics(), // Impede rolagem dentro do grid
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
           itemBuilder: (BuildContext context, int index) {
             return ElevatedButton(
               onPressed: () {
@@ -70,46 +104,34 @@ class _ConsultarAtletaScreenState extends State<ConsultarAtletaScreen> {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),
-                padding: const EdgeInsets.all(12.0),
               ),
               child: Text(
                 positions[index],
                 style: TextStyle(
                   color: selectedPosition == positions[index] ? Colors.white : Colors.black,
                   fontWeight: FontWeight.bold,
-                  fontSize: 12, // Ajuste para o tamanho da fonte
+                  fontSize: 12,
                 ),
               ),
             );
           },
         ),
-        // Botão "Aplicar"
         const SizedBox(height: 10),
         ElevatedButton(
-          onPressed: () {
-            Navigator.of(context).pop(); // Fecha o pop-up
-          },
+          onPressed: () => Navigator.of(context).pop(),
           style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.orange, // Cor laranja para o botão
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
-            padding: const EdgeInsets.symmetric(vertical: 12.0),
+            backgroundColor: Colors.orange,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
           ),
           child: const Text(
             'Aplicar',
-            style: TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-              fontSize: 14,
-            ),
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
           ),
         ),
       ],
     );
   }
 
-  // Pop-up de Rating
   Widget _buildRatingFilter() {
     return Column(
       children: List.generate(5, (index) {
@@ -121,7 +143,7 @@ class _ConsultarAtletaScreenState extends State<ConsultarAtletaScreen> {
             setState(() {
               selectedRating = value!;
             });
-            Navigator.of(context).pop(); // Fecha o pop-up após selecionar
+            Navigator.of(context).pop();
           },
         );
       }),
@@ -133,9 +155,8 @@ class _ConsultarAtletaScreenState extends State<ConsultarAtletaScreen> {
     return Scaffold(
       body: Column(
         children: [
-          // Barra de pesquisa substituindo o título
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
+            padding: const EdgeInsets.all(16.0),
             child: TextField(
               decoration: InputDecoration(
                 hintText: 'Pesquisar atleta',
@@ -149,7 +170,6 @@ class _ConsultarAtletaScreenState extends State<ConsultarAtletaScreen> {
               ),
             ),
           ),
-          // Filtros horizontais com ordenação por Ano, Posição e Clube
           SizedBox(
             height: 50,
             child: ListView.builder(
@@ -161,33 +181,25 @@ class _ConsultarAtletaScreenState extends State<ConsultarAtletaScreen> {
                     setState(() {
                       selectedFilter = index;
                     });
-                    if (filters[index] == "Ano" || filters[index] == "Clube") {
+                    if (filters[index] == 'Ano' || filters[index] == 'Clube') {
                       _sortAthletes(filters[index]);
-                    } else if (filters[index] == "Posição") {
+                    } else if (filters[index] == 'Posição') {
                       showDialog(
                         context: context,
                         builder: (BuildContext context) {
                           return AlertDialog(
-                            title: const Text(
-                              'Filtrar por Posição',
-                              style: TextStyle(fontSize: 14), // Reduzindo o tamanho da fonte
-                            ),
-                            content: SizedBox(
-                              height: 319, // Ajustando a altura para não sobrecarregar
-                              child: _buildPositionFilter(),
-                            ),
-                            actions: const [],
+                            title: const Text('Filtrar por Posição'),
+                            content: _buildPositionFilter(),
                           );
                         },
                       );
-                    } else if (filters[index] == "Rating") {
+                    } else if (filters[index] == 'Rating') {
                       showDialog(
                         context: context,
                         builder: (BuildContext context) {
                           return AlertDialog(
                             title: const Text('Filtrar por Rating'),
                             content: _buildRatingFilter(),
-                            actions: const [],
                           );
                         },
                       );
@@ -219,57 +231,20 @@ class _ConsultarAtletaScreenState extends State<ConsultarAtletaScreen> {
               },
             ),
           ),
-          // Lista de atletas com rating
           Expanded(
             child: ListView.builder(
               itemCount: athletes.length,
               itemBuilder: (context, index) {
                 final athlete = athletes[index];
-                return Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-                  child: Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: index % 2 == 0 ? Colors.grey[200] : Colors.white,
-                      borderRadius: BorderRadius.circular(10),
-                      boxShadow: const [
-                        BoxShadow(
-                          color: Colors.black26,
-                          blurRadius: 4.0,
-                          offset: Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              athlete['name'],
-                              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                            ),
-                            Text('Ano: ${athlete['year']}'),
-                            Text('Clube: ${athlete['club']}'),
-                            Text('Posição: ${athlete['position']}'),
-                          ],
-                        ),
-                        Row(
-                          children: [
-                            Text(
-                              '${athlete['rating']}',
-                              style: const TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                            const Icon(
-                              Icons.star,
-                              color: Colors.orange,
-                              size: 18,
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
+                return ListTile(
+                  title: Text(athlete['nome']),
+                  subtitle: Text('Clube: ${athlete['clube']}'),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text('${athlete['rating']}'),
+                      const Icon(Icons.star, color: Colors.orange),
+                    ],
                   ),
                 );
               },

@@ -24,14 +24,14 @@ class _HomeLoginScreenState extends State<HomeLoginScreen> {
             children: <Widget>[
               Image.asset(
                 'assets/images/logoacademico.png',
-                height: 200,
+                height: 150,
               ),
               const SizedBox(height: 30),
               const Text(
                 'VIRIATOS SCOUTING',
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  fontSize: 26,
+                  fontSize: 20,
                   fontWeight: FontWeight.bold,
                   color: Color.fromARGB(255, 255, 255, 255),
                 ),
@@ -50,7 +50,7 @@ class _HomeLoginScreenState extends State<HomeLoginScreen> {
               const Text(
                 'Onde o potencial encontra a oportunidade!',
                 style: TextStyle(
-                  fontSize: 19,
+                  fontSize: 18,
                   color: Color.fromARGB(255, 255, 255, 255),
                 ),
               ),
@@ -102,7 +102,7 @@ class _HomeLoginScreenState extends State<HomeLoginScreen> {
                     TextSpan(
                       text: 'Aceito as ',
                       style: TextStyle(
-                        fontSize: 18,
+                        fontSize: 14,
                         color: Color.fromARGB(255, 255, 255, 255),
                       ),
                       children: [

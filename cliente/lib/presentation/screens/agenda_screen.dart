@@ -6,11 +6,6 @@ class AgendaScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('AGENDA', style: TextStyle(fontWeight: FontWeight.bold)),
-        centerTitle: true,
-        backgroundColor: Colors.white,
-      ),
       body: Padding(
         padding: const EdgeInsets.all(12.0),
         child: Column(
