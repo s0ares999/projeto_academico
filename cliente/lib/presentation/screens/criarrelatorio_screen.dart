@@ -1,17 +1,15 @@
-// ignore_for_file: prefer_const_constructors
-
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
-class CriarAtletaScreen extends StatefulWidget {
-  const CriarAtletaScreen({super.key});
+class CriarRelatorioScreen extends StatefulWidget {
+  const CriarRelatorioScreen({super.key});
 
   @override
-  _CriarAtletaScreenState createState() => _CriarAtletaScreenState();
+  _CriarRelatorioScreenState createState() => _CriarRelatorioScreenState();
 }
 
-class _CriarAtletaScreenState extends State<CriarAtletaScreen> {
+class _CriarRelatorioScreenState extends State<CriarRelatorioScreen> {
   final TextEditingController _nomeController = TextEditingController();
   final TextEditingController _dataNascimentoController = TextEditingController();
   final TextEditingController _nacionalidadeController = TextEditingController();
@@ -32,9 +30,8 @@ class _CriarAtletaScreenState extends State<CriarAtletaScreen> {
   String? morfologiaSelecionada;
   String? ratingFinalSelecionado;
 
-  Future<void> _criarAtletaComRelatorio() async {
-    const String urlAtleta = 'http://192.168.1.73:4000/atletas';
-    const String urlRelatorio = 'http://192.168.1.73:4000/relatorios';
+  Future<void> _criarRelatorio() async {
+    const String urlRelatorio = 'http://192.168.1.118:4100/relatorios';
 
     if (_nomeController.text.trim().isEmpty ||
         _dataNascimentoController.text.trim().isEmpty ||
@@ -45,15 +42,19 @@ class _CriarAtletaScreenState extends State<CriarAtletaScreen> {
       return;
     }
 
-    final Map<String, dynamic> dadosAtleta = {
-      'nome': _nomeController.text.trim(),
-      'dataNascimento': _dataNascimentoController.text.trim(),
-      'nacionalidade': _nacionalidadeController.text.trim(),
-      'posicao': _posicaoController.text.trim(),
-      'clube': _clubeIdSelecionado,
-      'link': _linkController.text.trim(),
-      'agente': _nomeAgenteController.text.trim(),
-      'contactoAgente': _contactoAgenteController.text.trim(),
+    // Dados do relatório
+    final Map<String, dynamic> dadosRelatorio = {
+      'tecnica': tecnicaSelecionada,
+      'velocidade': velocidadeSelecionada,
+      'atitudeCompetitiva': atitudeSelecionada,
+      'inteligencia': inteligenciaSelecionada,
+      'altura': alturaSelecionada,
+      'morfologia': morfologiaSelecionada,
+      'ratingFinal': ratingFinalSelecionado,
+      'comentario': 'Relatório inicial',
+      'atletaNome': _nomeController.text.trim(),
+      'scoutId': 1, // Substitua pelo ID real do utilizador
+      'status': 'Pendente',
     };
 
     try {
@@ -61,45 +62,17 @@ class _CriarAtletaScreenState extends State<CriarAtletaScreen> {
         _criandoRelatorio = true;
       });
 
-      // Criar o atleta
-      final responseAtleta = await http.post(
-        Uri.parse(urlAtleta),
+      // Criar o relatório
+      final responseRelatorio = await http.post(
+        Uri.parse(urlRelatorio),
         headers: {'Content-Type': 'application/json'},
-        body: jsonEncode(dadosAtleta),
+        body: jsonEncode(dadosRelatorio),
       );
 
-      if (responseAtleta.statusCode == 201) {
-        final atletaCriado = jsonDecode(responseAtleta.body);
-
-        // Dados do relatório
-        final Map<String, dynamic> dadosRelatorio = {
-          'tecnica': tecnicaSelecionada,
-          'velocidade': velocidadeSelecionada,
-          'atitudeCompetitiva': atitudeSelecionada,
-          'inteligencia': inteligenciaSelecionada,
-          'altura': alturaSelecionada,
-          'morfologia': morfologiaSelecionada,
-          'ratingFinal': ratingFinalSelecionado,
-          'comentario': 'Relatório inicial',
-          'atletaNome': atletaCriado['nome'], // Nome do atleta
-          'scoutId': 1, // Substitua pelo ID real do utilizador
-          'status': 'Pendente',
-        };
-
-        // Criar o relatório associado ao atleta
-        final responseRelatorio = await http.post(
-          Uri.parse(urlRelatorio),
-          headers: {'Content-Type': 'application/json'},
-          body: jsonEncode(dadosRelatorio),
-        );
-
-        if (responseRelatorio.statusCode == 201) {
-          _showSuccessDialog('Atleta e relatório criados com sucesso!');
-        } else {
-          _showErrorDialog('Erro ao criar o relatório.');
-        }
+      if (responseRelatorio.statusCode == 201) {
+        _showSuccessDialog('Relatório criado com sucesso!');
       } else {
-        _showErrorDialog('Erro ao criar o atleta.');
+        _showErrorDialog('Erro ao criar o relatório.');
       }
     } catch (e) {
       _showErrorDialog('Erro de conexão: ${e.toString()}');
@@ -146,42 +119,12 @@ class _CriarAtletaScreenState extends State<CriarAtletaScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Criar Atleta'),
+        title: Text('Criar Relatório'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(12.0),
         child: ListView(
           children: [
-            // Campos de criação do atleta
-            TextField(
-              controller: _nomeController,
-              decoration: InputDecoration(labelText: 'Nome'),
-            ),
-            TextField(
-              controller: _dataNascimentoController,
-              decoration: InputDecoration(labelText: 'Data de Nascimento'),
-            ),
-            TextField(
-              controller: _nacionalidadeController,
-              decoration: InputDecoration(labelText: 'Nacionalidade'),
-            ),
-            TextField(
-              controller: _posicaoController,
-              decoration: InputDecoration(labelText: 'Posição'),
-            ),
-            DropdownButton<String>(
-              value: _clubeIdSelecionado,
-              hint: Text('Selecione o clube'),
-              items: [
-                DropdownMenuItem(value: '1', child: Text('Clube A')),
-                DropdownMenuItem(value: '2', child: Text('Clube B')),
-              ],
-              onChanged: (value) {
-                setState(() {
-                  _clubeIdSelecionado = value;
-                });
-              },
-            ),
             // Campos para o relatório
             buildSection('Técnica', 4, tecnicaSelecionada,
                 (value) => setState(() => tecnicaSelecionada = value)),
@@ -201,7 +144,7 @@ class _CriarAtletaScreenState extends State<CriarAtletaScreen> {
                 (value) => setState(() => ratingFinalSelecionado = value)),
             SizedBox(height: 16),
             ElevatedButton(
-              onPressed: _criandoRelatorio ? null : _criarAtletaComRelatorio,
+              onPressed: _criandoRelatorio ? null : _criarRelatorio,
               child: Text('Criar Relatório'),
             ),
           ],

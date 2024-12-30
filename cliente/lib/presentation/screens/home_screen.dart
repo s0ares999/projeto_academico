@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:pi4_academico/presentation/screens/agenda_screen.dart';
+import 'package:pi4_academico/presentation/screens/criarrelatorio_screen.dart';
 import 'package:pi4_academico/presentation/screens/login_screen.dart';
 import 'package:pi4_academico/presentation/screens/notificacoes_screen.dart';
 import 'criaratleta_screen.dart';
@@ -266,12 +267,11 @@ class HomePageContent extends StatelessWidget {
             ),
           ),
           SizedBox(height: 16),
-          // Coluna com os botões um em cima do outro
+
           Column(
             children: [
-              _buildSmallButton(context, 'AGENDA', AgendaScreen()),
               SizedBox(height: 8),
-              _buildSmallButton(context, 'ATLETAS', ConsultarAtletaScreen()),
+              _buildSmallButton(context, 'Criar Relatorio', CriarRelatorioScreen()),
             ],
           ),
         ],

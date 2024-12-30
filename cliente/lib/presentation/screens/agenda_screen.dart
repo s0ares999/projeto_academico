@@ -1,115 +1,62 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
-class AgendaScreen extends StatelessWidget {
-  const AgendaScreen({super.key});
+class AgendaScreen extends StatefulWidget {
+  @override
+  _AgendaScreenState createState() => _AgendaScreenState();
+}
+
+class _AgendaScreenState extends State<AgendaScreen> {
+  List<dynamic> partidas = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _carregarPartidas();
+  }
+
+  // Função para carregar as partidas da API
+  Future<void> _carregarPartidas() async {
+    final response = await http.get(Uri.parse('http://192.168.1.118:4100/partidas'));
+
+    if (response.statusCode == 200) {
+      setState(() {
+        partidas = json.decode(response.body);
+      });
+    } else {
+      throw Exception('Falha ao carregar partidas');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.all(12.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 10),
-            Expanded(
-              child: ListView(
-                children: [
-                  buildMatchCard('Red Devils', 'V. Greens', '9 Jan 2021', '19.45', 'assets/images/logo_red.png', 'assets/images/logo_green.png'),
-                  buildMatchCard('V. Greens', 'R. Birds', '11 Jan 2021', '19.45', 'assets/images/logo_green.png', 'assets/images/logo_red.png'),
-                  buildMatchCard('V. Greens', 'B. Monkeys', '15 Jan 2021', '19.45', 'assets/images/logo_green.png', 'assets/images/logo_monkey.png'),
-                  buildMatchCard('Red Devils', 'V. Greens', '18 Jan 2021', '19.45', 'assets/images/logo_red.png', 'assets/images/logo_green.png'),
-                  buildMatchCard('V. Greens', 'R. Birds', '24 Jan 2021', '19.45', 'assets/images/logo_green.png', 'assets/images/logo_red.png'),
-                  buildMatchCard('V. Greens', 'B. Monkeys', '30 Jan 2021', '19.45', 'assets/images/logo_green.png', 'assets/images/logo_monkey.png'),
-                  buildMatchCard('V. Greens', 'B. Monkeys', '9 Feb 2021', '19.45', 'assets/images/logo_green.png', 'assets/images/logo_monkey.png'),
-                ],
-              ),
+      body: partidas.isEmpty
+          ? Center(child: CircularProgressIndicator()) // Exibe um carregamento até que as partidas sejam carregadas
+          : ListView.builder(
+              itemCount: partidas.length,
+              itemBuilder: (context, index) {
+                var partida = partidas[index];
+                var timeMandante = partida['timeMandante']['nome'];
+                var timeVisitante = partida['timeVisitante']?['nome'] ?? 'Time Visitante não disponível';
+                var data = partida['data'];
+                var hora = partida['hora'];
+                var local = partida['local'];
+
+                return Card(
+                  margin: EdgeInsets.all(10),
+                  child: ListTile(
+                    title: Text('$timeMandante vs $timeVisitante'),
+                    subtitle: Text('Data: $data, Hora: $hora, Local: $local'),
+                    isThreeLine: true,
+                    onTap: () {
+                      // Ação ao clicar em uma partida (pode ser detalhamento ou outra ação)
+                    },
+                  ),
+                );
+              },
             ),
-          ],
-        ),
-      ),
     );
   }
-Widget buildMatchCard(String team1, String team2, String date, String time, String logo1, String logo2) {
-  return Card(
-    margin: const EdgeInsets.symmetric(vertical: 8),
-    child: Padding(
-      padding: const EdgeInsets.all(12.0),
-      child: Row(
-        mainAxisSize: MainAxisSize.max, // O Row vai ocupar o espaço disponível horizontalmente
-        mainAxisAlignment: MainAxisAlignment.spaceBetween, // Garante espaçamento adequado
-        children: [
-          // Coluna da equipa 1
-          Column(
-            children: [
-              Image.asset(logo1, height: 50),
-              const SizedBox(height: 8),
-              Text(
-                team1,
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: Colors.red,
-                ),
-              ),
-            ],
-          ),
-
-          // Conteúdo central (equipa vs equipa e data)
-          Expanded( // O conteúdo central expande-se conforme necessário
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Text(
-                  '$team1 vs $team2',
-                  style: const TextStyle(
-                    fontSize: 14, // Diminuí o tamanho da fonte
-                    fontWeight: FontWeight.bold,
-                  ),
-                  textAlign: TextAlign.center, // Centraliza o texto
-                ),
-                const SizedBox(height: 8),
-                const Row(
-                  mainAxisAlignment: MainAxisAlignment.center, // Centraliza os ícones e texto
-                  children: [
-                    Icon(Icons.calendar_today, size: 16, color: Colors.grey),
-                    SizedBox(width: 4),
-                    Text(
-                      '9 Jan 2021', // Exemplo de data
-                      style: TextStyle(
-                        color: Colors.grey,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  time,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14, // Diminuí o tamanho da fonte
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          // Coluna da equipa 2
-          Column(
-            children: [
-              Image.asset(logo2, height: 50),
-              const SizedBox(height: 8),
-              Text(
-                team2,
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: Colors.green,
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    ),
-  );
-}
 }

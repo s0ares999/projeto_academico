@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
 
 class CriarAtletaScreen extends StatefulWidget {
   const CriarAtletaScreen({super.key});
@@ -28,7 +29,7 @@ class _CriarAtletaScreenState extends State<CriarAtletaScreen> {
   }
 
   Future<void> _carregarClubes() async {
-    const String url = 'http://192.168.242.48:4000/times';
+    const String url = 'http://192.168.1.118:4100/times';
     try {
       final response = await http.get(Uri.parse(url));
       if (response.statusCode == 200) {
@@ -37,8 +38,7 @@ class _CriarAtletaScreenState extends State<CriarAtletaScreen> {
           _clubes = clubesJson.cast<Map<String, dynamic>>();
         });
       } else {
-        _showErrorDialog(
-            'Erro ao carregar clubes. Código de status: ${response.statusCode}');
+        _showErrorDialog('Erro ao carregar clubes. Código de status: ${response.statusCode}');
       }
     } catch (e) {
       _showErrorDialog('Erro de conexão: $e');
@@ -46,7 +46,7 @@ class _CriarAtletaScreenState extends State<CriarAtletaScreen> {
   }
 
   Future<void> _criarAtleta() async {
-    const String url = 'http://192.168.1.73:4000/atletas';
+    const String url = 'http://192.168.1.118:4100/atletas';
     if (_nomeController.text.trim().isEmpty ||
         _dataNascimentoController.text.trim().isEmpty ||
         _nacionalidadeController.text.trim().isEmpty ||
@@ -56,9 +56,12 @@ class _CriarAtletaScreenState extends State<CriarAtletaScreen> {
       return;
     }
 
+    final DateFormat backendFormat = DateFormat('dd/MM/yyyy');
+    final String formattedDate = backendFormat.format(DateTime.parse(_dataNascimentoController.text));
+
     final Map<String, dynamic> dadosAtleta = {
       'nome': _nomeController.text.trim(),
-      'dataNascimento': _dataNascimentoController.text.trim(),
+      'dataNascimento': formattedDate,
       'nacionalidade': _nacionalidadeController.text.trim(),
       'posicao': _posicaoController.text.trim(),
       'clube': _clubeIdSelecionado,
@@ -67,8 +70,6 @@ class _CriarAtletaScreenState extends State<CriarAtletaScreen> {
       'contactoAgente': _contactoAgenteController.text.trim(),
     };
 
-    print('Enviando dados do atleta: $dadosAtleta');
-
     try {
       final response = await http.post(
         Uri.parse(url),
@@ -76,22 +77,20 @@ class _CriarAtletaScreenState extends State<CriarAtletaScreen> {
         body: jsonEncode(dadosAtleta),
       );
 
-      print('Status Code: ${response.statusCode}');
-      print('Response Body: ${response.body}');
-
       if (response.statusCode == 201) {
+        final responseData = jsonDecode(response.body);
         showDialog(
           context: context,
           builder: (BuildContext context) {
             return AlertDialog(
               title: const Text('Sucesso'),
-              content: const Text(
-                  'O atleta foi criado com sucesso e está aguardando aprovação de um administrador.'),
+              content: Text(
+                  'Atleta criado com sucesso! ${responseData['mensagem'] ?? 'Ele está pendente de aprovação.'}'),
               actions: [
                 TextButton(
                   onPressed: () {
-                    Navigator.of(context).pop(); // Fecha o diálogo
-                    Navigator.pop(context, dadosAtleta); // Fecha a tela atual
+                    Navigator.of(context).pop(); // Fechar o diálogo
+                    Navigator.of(context).pop(); // Voltar para a página principal
                   },
                   child: const Text('OK'),
                 ),
@@ -105,8 +104,7 @@ class _CriarAtletaScreenState extends State<CriarAtletaScreen> {
             'Erro ao criar atleta: ${errorData['mensagem'] ?? 'Erro desconhecido.'}');
       }
     } catch (e) {
-      print('Erro ao criar atleta: $e');
-      _showErrorDialog('Erro de conexão: $e');
+      _showErrorDialog('Erro de conexão: ${e.toString()}');
     }
   }
 
@@ -152,46 +150,43 @@ class _CriarAtletaScreenState extends State<CriarAtletaScreen> {
       body: Container(
         color: Colors.grey[200],
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Expanded(
-              child: SingleChildScrollView(
-                child: Column(
-                  children: [
-                    _buildTextField('Nome', _nomeController),
-                    const SizedBox(height: 10),
-                    _buildDatePickerField('Data de Nascimento', _dataNascimentoController),
-                    const SizedBox(height: 10),
-                    _buildTextField('Nacionalidade', _nacionalidadeController),
-                    const SizedBox(height: 10),
-                    _buildTextField('Posição', _posicaoController),
-                    const SizedBox(height: 10),
-                    _buildDropdownField('Clube', _clubeIdSelecionado, _clubes),
-                    const SizedBox(height: 10),
-                    _buildTextField('Link', _linkController),
-                    const SizedBox(height: 10),
-                    _buildTextField('Nome do Agente', _nomeAgenteController),
-                    const SizedBox(height: 10),
-                    _buildTextField('Contato do Agente', _contactoAgenteController),
-                  ],
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              _buildTextField('Nome', _nomeController),
+              const SizedBox(height: 10),
+              _buildDatePickerField('Data de Nascimento', _dataNascimentoController),
+              const SizedBox(height: 10),
+              _buildTextField('Nacionalidade', _nacionalidadeController),
+              const SizedBox(height: 10),
+              _buildTextField('Posição', _posicaoController),
+              const SizedBox(height: 10),
+              _buildDropdownField('Clube', _clubeIdSelecionado, _clubes),
+              const SizedBox(height: 10),
+              _buildTextField('Link', _linkController),
+              const SizedBox(height: 10),
+              _buildTextField('Nome do Agente', _nomeAgenteController),
+              const SizedBox(height: 10),
+              _buildTextField('Contato do Agente', _contactoAgenteController),
+              const SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: _criarAtleta,
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 16.0),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  backgroundColor: Colors.black,
+                  foregroundColor: Colors.orange,
+                ),
+                child: const Text(
+                  'Criar Atleta',
+                  style: TextStyle(fontSize: 16),
                 ),
               ),
-            ),
-            ElevatedButton(
-              onPressed: _criarAtleta,
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 16.0),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-              ),
-              child: const Text(
-                'Criar Atleta',
-                style: TextStyle(fontSize: 16),
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -205,6 +200,12 @@ class _CriarAtletaScreenState extends State<CriarAtletaScreen> {
         filled: true,
         fillColor: Colors.white,
         border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+        focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
         ),
       ),
@@ -223,7 +224,13 @@ class _CriarAtletaScreenState extends State<CriarAtletaScreen> {
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
         ),
-        suffixIcon: const Icon(Icons.calendar_today),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+        suffixIcon: const Icon(Icons.calendar_today, color: Colors.orange),
       ),
     );
   }
@@ -248,6 +255,12 @@ class _CriarAtletaScreenState extends State<CriarAtletaScreen> {
         filled: true,
         fillColor: Colors.white,
         border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+        focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
         ),
       ),
