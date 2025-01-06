@@ -18,7 +18,7 @@ class _AgendaScreenState extends State<AgendaScreen> {
 
   // Função para carregar as partidas da API
   Future<void> _carregarPartidas() async {
-    final response = await http.get(Uri.parse('http://192.168.1.118:4100/partidas'));
+    final response = await http.get(Uri.parse('http://192.168.1.118:3000/partidas'));
 
     if (response.statusCode == 200) {
       setState(() {

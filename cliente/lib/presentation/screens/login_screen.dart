@@ -1,6 +1,12 @@
+// ignore_for_file: depend_on_referenced_packages
+
 import 'package:flutter/material.dart';
-import 'home_screen.dart'; // Importa a tela HomeScreen
-import 'forgotpassword_screen.dart'; // Importa a tela Esqueceu Senha
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'home_screen.dart';
+import 'home_screenconsultor.dart';
+import 'forgotpassword_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -13,7 +19,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  bool _isPasswordVisible = false; // Controla a visibilidade da palavra-passe
+  bool _isPasswordVisible = false;
 
   @override
   void dispose() {
@@ -22,24 +28,114 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
-  // Função para verificar as credenciais
-  void _login() {
-    final String username = _usernameController.text;
-    final String password = _passwordController.text;
+  // Função para realizar o login e armazenar dados
+  void _login() async {
+    final String email = _usernameController.text;
+    final String senha = _passwordController.text;
 
-    if (username == 'user' && password == '123') {
-      // Credenciais corretas, navega para a HomeScreen
+    try {
+      final response = await http.post(
+        Uri.parse('http://192.168.1.118:3000/auth/login'),
+        headers: <String, String>{
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(<String, String>{
+          'email': email,
+          'senha': senha,
+        }),
+      );
+
+      print("Request URL: ${Uri.parse('http://192.168.1.118:3000/auth/login')}");
+      print("Response Status: ${response.statusCode}");
+      print('Response Body: ${response.body}');
+
+      // Verificando status e corpo da resposta
+      if (response.statusCode == 200) {
+  final Map<String, dynamic> responseData = jsonDecode(response.body);
+  final String token = responseData['token'];
+  final String userId = responseData['id'].toString(); // Converte para String
+  final String userRole = responseData['role'];
+
+  // Limpar dados de login anteriores
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  prefs.remove('token');
+  prefs.remove('userId');
+  prefs.remove('userRole');
+
+  // Armazenar o token e os dados do usuário
+  prefs.setString('token', token);
+  prefs.setString('userId', userId);
+  prefs.setString('userRole', userRole);
+
+  // Verificar e exibir os dados armazenados para depuração
+  print('Token: $token');
+  print('User Id: $userId');
+  print('User Role: $userRole');
+
+  // Navegar para a tela correspondente ao papel do usuário
+  try {
+    if (userRole == 'Admin' || userRole == 'Scout') {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => const HomeScreen()),
       );
-    } else {
-      // Credenciais incorretas
+    } else if (userRole == 'Consultor') {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const HomeScreenConsultor()),
+      );
+    }
+  } catch (e) {
+    print("Erro ao navegar: $e");
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Erro ao navegar'),
+          content: Text('Erro ao navegar para a próxima tela: $e'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+}     else {
+        final Map<String, dynamic> responseData = jsonDecode(response.body);
+        String errorMessage = responseData['message'] ?? 'Nome de utilizador ou palavra-passe incorretos';
+
+        // Exibe o erro caso o login falhe
+        showDialog(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              title: Text(errorMessage),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text('OK'),
+                ),
+              ],
+            );
+          },
+        );
+      }
+    } catch (error) {
+      // Erro de conexão ou outro erro
+      print("Erro de conexão ou outro erro: $error");
       showDialog(
         context: context,
         builder: (context) {
           return AlertDialog(
-            title: const Text('Nome de utilizador ou palavra-passe incorretos'),
+            title: const Text('Erro de conexão'),
+            content: const Text('Não foi possível conectar ao servidor.'),
             actions: [
               TextButton(
                 onPressed: () {

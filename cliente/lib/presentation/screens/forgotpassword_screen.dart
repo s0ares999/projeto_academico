@@ -190,7 +190,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color.fromARGB(218, 210, 210, 210),
-                      padding: const EdgeInsets.symmetric(horizontal: 150, vertical: 16),
+                      padding: const EdgeInsets.symmetric(horizontal: 80, vertical: 20),
                       textStyle: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,

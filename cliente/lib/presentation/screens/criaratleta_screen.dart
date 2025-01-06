@@ -29,7 +29,7 @@ class _CriarAtletaScreenState extends State<CriarAtletaScreen> {
   }
 
   Future<void> _carregarClubes() async {
-    const String url = 'http://192.168.1.118:4100/times';
+    const String url = 'http://192.168.1.118:3000/times';
     try {
       final response = await http.get(Uri.parse(url));
       if (response.statusCode == 200) {
@@ -46,7 +46,7 @@ class _CriarAtletaScreenState extends State<CriarAtletaScreen> {
   }
 
   Future<void> _criarAtleta() async {
-    const String url = 'http://192.168.1.118:4100/atletas';
+    const String url = 'http://192.168.1.118:3000/atletas';
     if (_nomeController.text.trim().isEmpty ||
         _dataNascimentoController.text.trim().isEmpty ||
         _nacionalidadeController.text.trim().isEmpty ||

@@ -5,9 +5,7 @@ import 'package:pi4_academico/presentation/screens/agenda_screen.dart';
 import 'package:pi4_academico/presentation/screens/login_screen.dart';
 import 'package:pi4_academico/presentation/screens/notificacoes_screen.dart';
 import 'package:pi4_academico/theme_notifier.dart';
-import 'criaratleta_screen.dart';
 import 'consultaratleta_screen.dart';
-import 'criarrelatorio_screen.dart';
 import 'package:provider/provider.dart';
 
 void main() {
@@ -25,12 +23,11 @@ class MyApp extends StatelessWidget {
         builder: (context, themeNotifier, _) {
           return MaterialApp(
             debugShowCheckedModeBanner: false,
-            theme: ThemeData.light(), // Tema claro
-            darkTheme: ThemeData.dark(), // Tema escuro
-            themeMode: themeNotifier.isDarkMode
-                ? ThemeMode.dark
-                : ThemeMode.light, // Altera o tema dinamicamente
-            home: const HomeScreen(),
+            theme: ThemeData.light(),
+            darkTheme: ThemeData.dark(),
+            themeMode:
+                themeNotifier.isDarkMode ? ThemeMode.dark : ThemeMode.light,
+            home: const HomeScreenConsultor(),
           );
         },
       ),
@@ -38,14 +35,14 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+class HomeScreenConsultor extends StatefulWidget {
+  const HomeScreenConsultor({super.key});
 
   @override
-  _HomeScreenState createState() => _HomeScreenState();
+  _HomeScreenConsultorState createState() => _HomeScreenConsultorState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenConsultorState extends State<HomeScreenConsultor> {
   int _selectedIndex = 0;
   Map<String, dynamic>? nextMatch;
 
@@ -57,39 +54,35 @@ class _HomeScreenState extends State<HomeScreen> {
     _fetchNextMatch();
   }
 
-  
+  Future<void> _fetchNextMatch() async {
+    try {
+      final response =
+          await http.get(Uri.parse('http://192.168.1.118:3000/partidas'));
 
- Future<void> _fetchNextMatch() async {
-  try {
-    final response = await http.get(Uri.parse('http://192.168.1.118:3000/partidas'));
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
 
-    if (response.statusCode == 200) {
-      final data = json.decode(response.body);
-      print('Resposta da API: $data'); // Adicione este print para depuração
+        if (data['partidas'] != null && data['partidas'].isNotEmpty) {
+          var lastMatch = (data['partidas'] as List).last;
 
-      if (data['partidas'] != null && data['partidas'].isNotEmpty) {
-        // Pega a última partida criada, sem filtrar apenas as futuras
-        var lastMatch = (data['partidas'] as List).last;
-
-        setState(() {
-          nextMatch = lastMatch; // Pega a última partida
-        });
+          setState(() {
+            nextMatch = lastMatch;
+          });
+        } else {
+          setState(() {
+            nextMatch = null;
+          });
+        }
       } else {
-        setState(() {
-          nextMatch = null; // Nenhuma partida encontrada
-        });
+        throw Exception(
+            'Erro ao carregar partida, código: ${response.statusCode}');
       }
-    } else {
-      throw Exception('Erro ao carregar partida, código: ${response.statusCode}');
+    } catch (e) {
+      setState(() {
+        nextMatch = null;
+      });
     }
-  } catch (e) {
-    print('Erro ao buscar partida: $e'); // Exibe erro no console
-    setState(() {
-      nextMatch = null; // Se ocorrer erro na requisição
-    });
   }
-}
-
 
   void _onItemTapped(int index) {
     setState(() {
@@ -102,7 +95,6 @@ class _HomeScreenState extends State<HomeScreen> {
     _screens.addAll([
       HomePageContent(nextMatch: nextMatch),
       AgendaScreen(),
-      CriarAtletaScreen(),
       ConsultarAtletaScreen(),
     ]);
 
@@ -122,7 +114,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'Pedro',
+                    'Rui',
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 20,
@@ -139,17 +131,8 @@ class _HomeScreenState extends State<HomeScreen> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => NotificacoesScreen()),
-                          );
-                        },
-                      ),
-                      IconButton(
-                        icon: Icon(Icons.logout, color: Colors.white, size: 20),
-                        onPressed: () {
-                          Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => LoginScreen()),
+                              builder: (context) => NotificacoesScreen(),
+                            ),
                           );
                         },
                       ),
@@ -162,7 +145,6 @@ class _HomeScreenState extends State<HomeScreen> {
                           size: 20,
                         ),
                         onPressed: () {
-                          // Alterna entre os modos de tema
                           context.read<ThemeNotifier>().toggleTheme();
                         },
                       ),
@@ -178,29 +160,59 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       ),
       bottomNavigationBar: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 3),
-        child: Container(
-          height: 60,
-          decoration: BoxDecoration(
-            color: Colors.white,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey.withOpacity(0.2),
-                spreadRadius: 3,
-                blurRadius: 6,
+        padding: const EdgeInsets.only(bottom: 0),
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            Container(
+              height: 50,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.2),
+                    spreadRadius: 3,
+                    blurRadius: 6,
+                  ),
+                ],
               ),
-            ],
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              _buildNavItem(Icons.home, "Início", 0),
-              _buildNavItem(Icons.calendar_today, "Agenda", 1),
-              _buildCentralLogo(),
-              _buildNavItem(Icons.person_add_alt_1, "Criar", 2),
-              _buildNavItem(Icons.people, "Atletas", 3),
-            ],
-          ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  _buildNavItem(Icons.home, "Início", 0),
+                  _buildNavItem(Icons.calendar_today, "Agenda", 1),
+                  SizedBox(width: 50), // Espaço reservado para o botão central
+                  _buildNavItem(Icons.people, "Atletas", 2),
+                  _buildNavItem(
+                      Icons.logout, "Logout", 3), // Botão de logout adicionado
+                ],
+              ),
+            ),
+            Positioned(
+              bottom: 0,
+              child: GestureDetector(
+                onTap: () => _onItemTapped(0),
+                child: Container(
+                  padding: EdgeInsets.all(
+                      4), // Reduzido o padding para dar mais espaço à imagem
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.white,
+                    boxShadow: [
+                      BoxShadow(color: Colors.grey, blurRadius: 4),
+                    ],
+                  ),
+                  child: Image.asset(
+                    'assets/images/logoacademico.png',
+                    height:
+                        42, // Ajustado para um valor menor, para evitar que o logo fique cortado
+                    fit: BoxFit
+                        .contain, // Garante que a imagem se ajuste ao tamanho do contêiner
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -208,7 +220,18 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildNavItem(IconData icon, String label, int index) {
     return GestureDetector(
-      onTap: () => _onItemTapped(index),
+      onTap: () {
+        if (label == "Logout") {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => LoginScreen(),
+            ),
+          );
+        } else {
+          _onItemTapped(index);
+        }
+      },
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -225,27 +248,6 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildCentralLogo() {
-    return GestureDetector(
-      onTap: () => _onItemTapped(0),
-      child: Container(
-        margin: EdgeInsets.only(bottom: 1),
-        padding: EdgeInsets.all(6),
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: Colors.white,
-          boxShadow: [
-            BoxShadow(color: Colors.grey, blurRadius: 4),
-          ],
-        ),
-        child: Image.asset(
-          'assets/images/logoacademico.png',
-          height: 50,
-        ),
       ),
     );
   }
@@ -331,29 +333,6 @@ class HomePageContent extends StatelessWidget {
                   ),
           ),
           SizedBox(height: 24),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => CriarRelatorioScreen()),
-              );
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.black, // Cor de fundo preta
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(14), // Bordas arredondadas
-              ),
-              padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-            ),
-            child: Text(
-              "Criar Relatório",
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: Colors.white, // Cor do texto branca
-              ),
-            ),
-          )
         ],
       ),
     );

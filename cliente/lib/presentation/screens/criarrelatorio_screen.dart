@@ -39,7 +39,7 @@ class _CriarRelatorioScreenState extends State<CriarRelatorioScreen> {
   }
 
   Future<void> _carregarAtletas() async {
-    const String urlAtletas = 'http://192.168.1.118:4100/atletas'; // URL para buscar atletas
+    const String urlAtletas = 'http://192.168.1.118:3000/atletas'; // URL para buscar atletas
     try {
       final response = await http.get(Uri.parse(urlAtletas));
       if (response.statusCode == 200) {
@@ -48,7 +48,7 @@ class _CriarRelatorioScreenState extends State<CriarRelatorioScreen> {
           _atletas = data;
         });
       } else {
-        _showErrorDialog('Erro ao carregar atletas.');
+        _showErrorDialog('Erro ao carregar atletas. Código: ${response.statusCode}');
       }
     } catch (e) {
       _showErrorDialog('Erro de conexão: ${e.toString()}');
@@ -56,20 +56,7 @@ class _CriarRelatorioScreenState extends State<CriarRelatorioScreen> {
   }
 
   Future<void> _criarRelatorio() async {
-    const String urlRelatorio = 'http://192.168.1.118:4100/relatorios';
-
-    // Verificar se todos os campos obrigatórios estão preenchidos
-    if (_atletaIdSelecionado == null ||
-        tecnicaSelecionada == null ||
-        velocidadeSelecionada == null ||
-        atitudeSelecionada == null ||
-        inteligenciaSelecionada == null ||
-        alturaSelecionada == null ||
-        morfologiaSelecionada == null ||
-        ratingFinalSelecionado == null) {
-      _showErrorDialog('Por favor, preencha todos os campos obrigatórios.');
-      return;
-    }
+    const String urlRelatorio = 'http://192.168.1.118:3000/relatorios';
 
     // Dados do relatório
     final Map<String, dynamic> dadosRelatorio = {
@@ -79,10 +66,9 @@ class _CriarRelatorioScreenState extends State<CriarRelatorioScreen> {
       'inteligencia': inteligenciaSelecionada,
       'altura': alturaSelecionada,
       'morfologia': morfologiaSelecionada,
-      'ratingFinal': ratingFinalSelecionado,
-      'comentario': 'Relatório inicial',
+      'ratingFinal': int.tryParse(ratingFinalSelecionado ?? '0'),
+      'comentario': '', // Adicione um valor padrão
       'atletaId': _atletaIdSelecionado, // ID do atleta selecionado
-      'scoutId': 1, // Substitua pelo ID real do utilizador
       'status': 'Pendente',
     };
 
@@ -91,17 +77,22 @@ class _CriarRelatorioScreenState extends State<CriarRelatorioScreen> {
         _criandoRelatorio = true;
       });
 
+      final token = 'SEU_TOKEN_AQUI'; // Obtenha o token do armazenamento seguro
+
       // Criar o relatório
       final responseRelatorio = await http.post(
         Uri.parse(urlRelatorio),
-        headers: {'Content-Type': 'application/json'},
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token', // Envie o token no cabeçalho
+        },
         body: jsonEncode(dadosRelatorio),
       );
 
       if (responseRelatorio.statusCode == 201) {
         _showSuccessDialog('Relatório criado com sucesso!');
       } else {
-        _showErrorDialog('Erro ao criar o relatório.');
+        _showErrorDialog('Erro ao criar o relatório: ${responseRelatorio.body}');
       }
     } catch (e) {
       _showErrorDialog('Erro de conexão: ${e.toString()}');
@@ -116,12 +107,12 @@ class _CriarRelatorioScreenState extends State<CriarRelatorioScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Erro'),
+        title: const Text('Erro'),
         content: Text(message),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text('OK'),
+            child: const Text('OK'),
           ),
         ],
       ),
@@ -132,12 +123,12 @@ class _CriarRelatorioScreenState extends State<CriarRelatorioScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Sucesso'),
+        title: const Text('Sucesso'),
         content: Text(message),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text('OK'),
+            child: const Text('OK'),
           ),
         ],
       ),
@@ -148,16 +139,15 @@ class _CriarRelatorioScreenState extends State<CriarRelatorioScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Criar Relatório'),
+        title: const Text('Criar Relatório'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(12.0),
         child: ListView(
           children: [
-            // Dropdown para selecionar o atleta
             DropdownButton<String>(
               value: _atletaIdSelecionado,
-              hint: Text('Selecione o Atleta'),
+              hint: const Text('Selecione o Atleta'),
               onChanged: (String? newValue) {
                 setState(() {
                   _atletaIdSelecionado = newValue;
@@ -170,7 +160,6 @@ class _CriarRelatorioScreenState extends State<CriarRelatorioScreen> {
                 );
               }).toList(),
             ),
-            // Campos para o relatório
             buildSection('Técnica', 4, tecnicaSelecionada,
                 (value) => setState(() => tecnicaSelecionada = value)),
             buildSection('Velocidade', 4, velocidadeSelecionada,
@@ -187,10 +176,10 @@ class _CriarRelatorioScreenState extends State<CriarRelatorioScreen> {
                 customOptions: ['Ectomorfo', 'Mesomorfo', 'Endomorfo']),
             buildSection('Rating Final', 4, ratingFinalSelecionado,
                 (value) => setState(() => ratingFinalSelecionado = value)),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             ElevatedButton(
               onPressed: _criandoRelatorio ? null : _criarRelatorio,
-              child: Text('Criar Relatório'),
+              child: const Text('Criar Relatório'),
             ),
           ],
         ),
@@ -204,7 +193,7 @@ class _CriarRelatorioScreenState extends State<CriarRelatorioScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(title, style: TextStyle(fontWeight: FontWeight.bold)),
+        Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
         Wrap(
           spacing: 10.0,
           children: customOptions != null
