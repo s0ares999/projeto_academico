@@ -18,8 +18,10 @@ class _CriarRelatorioScreenState extends State<CriarRelatorioScreen> {
   final TextEditingController _nomeAgenteController = TextEditingController();
   final TextEditingController _contactoAgenteController = TextEditingController();
 
-  String? _clubeIdSelecionado;
+  String? _atletaIdSelecionado;
   bool _criandoRelatorio = false;
+
+  List<dynamic> _atletas = [];
 
   // Variáveis para os campos do relatório
   String? tecnicaSelecionada;
@@ -30,14 +32,41 @@ class _CriarRelatorioScreenState extends State<CriarRelatorioScreen> {
   String? morfologiaSelecionada;
   String? ratingFinalSelecionado;
 
+  @override
+  void initState() {
+    super.initState();
+    _carregarAtletas();
+  }
+
+  Future<void> _carregarAtletas() async {
+    const String urlAtletas = 'http://192.168.1.118:4100/atletas'; // URL para buscar atletas
+    try {
+      final response = await http.get(Uri.parse(urlAtletas));
+      if (response.statusCode == 200) {
+        final List<dynamic> data = jsonDecode(response.body);
+        setState(() {
+          _atletas = data;
+        });
+      } else {
+        _showErrorDialog('Erro ao carregar atletas.');
+      }
+    } catch (e) {
+      _showErrorDialog('Erro de conexão: ${e.toString()}');
+    }
+  }
+
   Future<void> _criarRelatorio() async {
     const String urlRelatorio = 'http://192.168.1.118:4100/relatorios';
 
-    if (_nomeController.text.trim().isEmpty ||
-        _dataNascimentoController.text.trim().isEmpty ||
-        _nacionalidadeController.text.trim().isEmpty ||
-        _posicaoController.text.trim().isEmpty ||
-        _clubeIdSelecionado == null) {
+    // Verificar se todos os campos obrigatórios estão preenchidos
+    if (_atletaIdSelecionado == null ||
+        tecnicaSelecionada == null ||
+        velocidadeSelecionada == null ||
+        atitudeSelecionada == null ||
+        inteligenciaSelecionada == null ||
+        alturaSelecionada == null ||
+        morfologiaSelecionada == null ||
+        ratingFinalSelecionado == null) {
       _showErrorDialog('Por favor, preencha todos os campos obrigatórios.');
       return;
     }
@@ -52,7 +81,7 @@ class _CriarRelatorioScreenState extends State<CriarRelatorioScreen> {
       'morfologia': morfologiaSelecionada,
       'ratingFinal': ratingFinalSelecionado,
       'comentario': 'Relatório inicial',
-      'atletaNome': _nomeController.text.trim(),
+      'atletaId': _atletaIdSelecionado, // ID do atleta selecionado
       'scoutId': 1, // Substitua pelo ID real do utilizador
       'status': 'Pendente',
     };
@@ -125,6 +154,22 @@ class _CriarRelatorioScreenState extends State<CriarRelatorioScreen> {
         padding: const EdgeInsets.all(12.0),
         child: ListView(
           children: [
+            // Dropdown para selecionar o atleta
+            DropdownButton<String>(
+              value: _atletaIdSelecionado,
+              hint: Text('Selecione o Atleta'),
+              onChanged: (String? newValue) {
+                setState(() {
+                  _atletaIdSelecionado = newValue;
+                });
+              },
+              items: _atletas.map<DropdownMenuItem<String>>((atleta) {
+                return DropdownMenuItem<String>(
+                  value: atleta['id'].toString(),
+                  child: Text(atleta['nome']),
+                );
+              }).toList(),
+            ),
             // Campos para o relatório
             buildSection('Técnica', 4, tecnicaSelecionada,
                 (value) => setState(() => tecnicaSelecionada = value)),

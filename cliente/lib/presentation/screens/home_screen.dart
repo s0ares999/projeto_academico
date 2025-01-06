@@ -1,14 +1,42 @@
-// ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
-
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:pi4_academico/presentation/screens/agenda_screen.dart';
-import 'package:pi4_academico/presentation/screens/criarrelatorio_screen.dart';
 import 'package:pi4_academico/presentation/screens/login_screen.dart';
 import 'package:pi4_academico/presentation/screens/notificacoes_screen.dart';
+import 'package:pi4_academico/theme_notifier.dart';
 import 'criaratleta_screen.dart';
 import 'consultaratleta_screen.dart';
+import 'criarrelatorio_screen.dart';
 import 'package:provider/provider.dart';
-import '/theme_notifier.dart';
+
+void main() {
+  runApp(const MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return ChangeNotifierProvider<ThemeNotifier>(
+      create: (_) => ThemeNotifier(),
+      child: Consumer<ThemeNotifier>(
+        builder: (context, themeNotifier, _) {
+          return MaterialApp(
+            debugShowCheckedModeBanner: false,
+            theme: ThemeData.light(), // Tema claro
+            darkTheme: ThemeData.dark(), // Tema escuro
+            themeMode: themeNotifier.isDarkMode
+                ? ThemeMode.dark
+                : ThemeMode.light, // Altera o tema dinamicamente
+            home: const HomeScreen(),
+          );
+        },
+      ),
+    );
+  }
+}
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -19,13 +47,47 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
+  Map<String, dynamic>? nextMatch;
 
-  final List<Widget> _screens = [
-    HomePageContent(),
-    AgendaScreen(),
-    CriarAtletaScreen(),
-    ConsultarAtletaScreen(),
-  ];
+  final List<Widget> _screens = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchNextMatch();
+  }
+
+ Future<void> _fetchNextMatch() async {
+  try {
+    final response = await http.get(Uri.parse('http://192.168.1.118:4100/partidas'));
+
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      print('Resposta da API: $data'); // Adicione este print para depuração
+
+      if (data['partidas'] != null && data['partidas'].isNotEmpty) {
+        // Pega a última partida criada, sem filtrar apenas as futuras
+        var lastMatch = (data['partidas'] as List).last;
+
+        setState(() {
+          nextMatch = lastMatch; // Pega a última partida
+        });
+      } else {
+        setState(() {
+          nextMatch = null; // Nenhuma partida encontrada
+        });
+      }
+    } else {
+      throw Exception('Erro ao carregar partida, código: ${response.statusCode}');
+    }
+  } catch (e) {
+    print('Erro ao buscar partida: $e'); // Exibe erro no console
+    setState(() {
+      nextMatch = null; // Se ocorrer erro na requisição
+    });
+  }
+}
+
 
   void _onItemTapped(int index) {
     setState(() {
@@ -35,10 +97,16 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    _screens.addAll([
+      HomePageContent(nextMatch: nextMatch),
+      AgendaScreen(),
+      CriarAtletaScreen(),
+      ConsultarAtletaScreen(),
+    ]);
+
     return Scaffold(
       body: Column(
         children: [
-          // Seção do topo arredondada
           Container(
             padding: EdgeInsets.symmetric(horizontal: 16, vertical: 30),
             decoration: BoxDecoration(
@@ -63,11 +131,13 @@ class _HomeScreenState extends State<HomeScreen> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       IconButton(
-                        icon: Icon(Icons.notifications, color: Colors.white, size: 20),
+                        icon: Icon(Icons.notifications,
+                            color: Colors.white, size: 20),
                         onPressed: () {
                           Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (context) => NotificacoesScreen()),
+                            MaterialPageRoute(
+                                builder: (context) => NotificacoesScreen()),
                           );
                         },
                       ),
@@ -76,21 +146,22 @@ class _HomeScreenState extends State<HomeScreen> {
                         onPressed: () {
                           Navigator.pushReplacement(
                             context,
-                            MaterialPageRoute(builder: (context) => LoginScreen()),
+                            MaterialPageRoute(
+                                builder: (context) => LoginScreen()),
                           );
                         },
                       ),
                       IconButton(
                         icon: Icon(
-                          Provider.of<ThemeNotifier>(context).isDarkMode
-                              ? Icons.brightness_3
-                              : Icons.brightness_7,
+                          context.watch<ThemeNotifier>().isDarkMode
+                              ? Icons.brightness_7
+                              : Icons.brightness_4,
                           color: Colors.white,
                           size: 20,
                         ),
                         onPressed: () {
-                          Provider.of<ThemeNotifier>(context, listen: false)
-                              .toggleTheme();
+                          // Alterna entre os modos de tema
+                          context.read<ThemeNotifier>().toggleTheme();
                         },
                       ),
                     ],
@@ -112,9 +183,10 @@ class _HomeScreenState extends State<HomeScreen> {
             color: Colors.white,
             boxShadow: [
               BoxShadow(
-                  color: Colors.grey.withOpacity(0.2),
-                  spreadRadius: 3,
-                  blurRadius: 6),
+                color: Colors.grey.withOpacity(0.2),
+                spreadRadius: 3,
+                blurRadius: 6,
+              ),
             ],
           ),
           child: Row(
@@ -134,17 +206,15 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildNavItem(IconData icon, String label, int index) {
     return GestureDetector(
-      onTap: () {
-        setState(() {
-          _selectedIndex = index;
-        });
-      },
+      onTap: () => _onItemTapped(index),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon,
-              color: _selectedIndex == index ? Colors.orange : Colors.black,
-              size: 20),
+          Icon(
+            icon,
+            color: _selectedIndex == index ? Colors.orange : Colors.black,
+            size: 20,
+          ),
           Text(
             label,
             style: TextStyle(
@@ -159,12 +229,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildCentralLogo() {
     return GestureDetector(
-      onTap: () {
-        // Navegação para a página inicial ao clicar no logotipo central
-        setState(() {
-          _selectedIndex = 0;
-        });
-      },
+      onTap: () => _onItemTapped(0),
       child: Container(
         margin: EdgeInsets.only(bottom: 1),
         padding: EdgeInsets.all(6),
@@ -185,7 +250,9 @@ class _HomeScreenState extends State<HomeScreen> {
 }
 
 class HomePageContent extends StatelessWidget {
-  const HomePageContent({super.key});
+  final Map<String, dynamic>? nextMatch;
+
+  const HomePageContent({super.key, this.nextMatch});
 
   @override
   Widget build(BuildContext context) {
@@ -209,113 +276,84 @@ class HomePageContent extends StatelessWidget {
                 ),
               ],
             ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Column(
-                      children: [
-                        Image.asset('assets/images/logo_red.png', height: 40),
-                        Text('Red D.',
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold, fontSize: 12)),
-                      ],
-                    ),
-                    Column(
-                      children: [
-                        Icon(Icons.stadium, color: Colors.grey, size: 18),
-                        Text('Estádio da Luz',
-                            style: TextStyle(color: Colors.grey, fontSize: 10)),
-                        Text('19.45',
-                            style: TextStyle(
-                                color: Colors.orange, fontSize: 26, fontWeight: FontWeight.bold)),
-                        Text('28 Março 2025',
-                            style: TextStyle(color: Colors.grey, fontSize: 10)),
-                      ],
-                    ),
-                    Column(
-                      children: [
-                        Image.asset('assets/images/logo_green.png', height: 40),
-                        Text('Victory G.',
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold, fontSize: 12)),
-                      ],
-                    ),
-                  ],
-                ),
-                SizedBox(height: 16),
-                Text(
-                  'Próximo jogo',
-                  style: TextStyle(
-                      color: Colors.grey,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 12),
-                ),
-                SizedBox(height: 8),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    _buildCountdownUnit('02', 'Days'),
-                    _buildCountdownUnit('08', 'Hrs'),
-                    _buildCountdownUnit('47', 'Mins'),
-                    _buildCountdownUnit('01', 'Secs'),
-                  ],
-                ),
-              ],
+            child: nextMatch != null
+                ? Column(
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Column(
+                            children: [
+                              Text(
+                                nextMatch!['timeMandante'],
+                                style: TextStyle(
+                                    fontWeight: FontWeight.bold, fontSize: 12),
+                              ),
+                            ],
+                          ),
+                          Column(
+                            children: [
+                              Text(
+                                nextMatch!['hora'],
+                                style: TextStyle(
+                                    color: Colors.orange,
+                                    fontSize: 26,
+                                    fontWeight: FontWeight.bold),
+                              ),
+                              Text(
+                                DateTime.parse(nextMatch!['data'])
+                                    .toLocal()
+                                    .toString()
+                                    .substring(0, 10),
+                                style:
+                                    TextStyle(color: Colors.grey, fontSize: 10),
+                              ),
+                            ],
+                          ),
+                          Column(
+                            children: [
+                              Text(
+                                nextMatch!['timeVisitante'],
+                                style: TextStyle(
+                                    fontWeight: FontWeight.bold, fontSize: 12),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ],
+                  )
+                : Text(
+                    "Nenhum jogo encontrado.",
+                    style: TextStyle(color: Colors.grey),
+                  ),
+          ),
+          SizedBox(height: 24),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => CriarRelatorioScreen()),
+              );
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.black, // Cor de fundo preta
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14), // Bordas arredondadas
+              ),
+              padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
             ),
-          ),
-          SizedBox(height: 16),
-
-          Column(
-            children: [
-              SizedBox(height: 8),
-              _buildSmallButton(context, 'Criar Relatorio', CriarRelatorioScreen()),
-            ],
-          ),
+            child: Text(
+              "Criar Relatório",
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: Colors.white, // Cor do texto branca
+              ),
+            ),
+          )
         ],
       ),
-    );
-  }
-
-  Widget _buildCountdownUnit(String value, String label) {
-    return Column(
-      children: [
-        Text(
-          value,
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        Text(
-          label,
-          style: TextStyle(
-            color: Colors.grey,
-            fontSize: 10,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildSmallButton(BuildContext context, String text, Widget targetScreen) {
-    return ElevatedButton(
-      style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.black,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-        ),
-        minimumSize: Size(200, 45),
-      ),
-      onPressed: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => targetScreen),
-        );
-      },
-      child: Text(text, style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
     );
   }
 }

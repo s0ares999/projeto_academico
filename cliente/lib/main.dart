@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart'; // Importa o Provider
-import '/presentation/screens/splash_screen.dart'; // Adiciona a importação da SplashScreen
+import '/presentation/screens/splash_screen.dart'; // Importa a SplashScreen
 import 'theme_notifier.dart'; // Importa o ThemeNotifier
 
 void main() {

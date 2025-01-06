@@ -1,3 +1,5 @@
+// src/controllers/PartidaController.js
+
 const Sequelize = require('sequelize');
 const Partida = require('../models/Partida');
 const Atleta = require('../models/Atleta');
@@ -77,43 +79,12 @@ module.exports = {
         ],
       });
 
+      console.log(partidas);
+
       res.status(200).json(partidas);
     } catch (error) {
       console.error(error);
       res.status(500).json({ error: 'Erro ao buscar as partidas' });
-    }
-  },
-
-  // Método para listar a próxima partida
-  async listarProximaPartida(req, res) {
-    try {
-      const partidas = await Partida.findAll({
-        include: [
-          { model: Time, as: 'timeMandante' },
-          { model: Time, as: 'timeVisitante' },
-          { model: Atleta, as: 'jogadores' },
-          { model: Utilizadores, as: 'scouts' },
-        ],
-      });
-
-      // Filtra a próxima partida com base na data
-      const próximaPartida = partidas
-        .map(partida => {
-          const partidaData = new Date(partida.data);
-          return { ...partida.toJSON(), partidaData };
-        })
-        .filter(partida => partida.partidaData > new Date()) // Filtra as partidas no futuro
-        .sort((a, b) => a.partidaData - b.partidaData) // Ordena por data
-        .shift(); // Pega o primeiro jogo (próxima partida)
-
-      if (!próximaPartida) {
-        return res.status(404).json({ message: 'Nenhuma partida futura encontrada' });
-      }
-
-      res.status(200).json(próximaPartida);
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ error: 'Erro ao buscar a próxima partida' });
     }
   },
 
