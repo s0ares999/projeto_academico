@@ -11,6 +11,7 @@ class ConsultarAtletaScreen extends StatefulWidget {
 
 class _ConsultarAtletaScreenState extends State<ConsultarAtletaScreen> {
   List<Map<String, dynamic>> athletes = [];
+  List<Map<String, dynamic>> reports = [];
   final List<String> filters = ["Ano", "Posição", "Clube", "Rating"];
   int selectedFilter = 0;
   int selectedRating = 3;
@@ -19,32 +20,55 @@ class _ConsultarAtletaScreenState extends State<ConsultarAtletaScreen> {
   @override
   void initState() {
     super.initState();
-    _fetchAthletes(); // Busca os atletas ao inicializar a página
+    _fetchAthletes(); // Busca os atletas
+    _fetchReports();  // Busca os relatórios
   }
 
-Future<void> _fetchAthletes() async {
-  const String url = 'http://192.168.1.118:3000/atletas'; // Adicione "http://" para uma URL válida
-  try {
-    final response = await http.get(Uri.parse(url));
+  Future<void> _fetchAthletes() async {
+    const String url = 'http://192.168.0.27:3000/atletas';
+    try {
+      final response = await http.get(Uri.parse(url));
 
-    if (response.statusCode == 200) {
-      // Decodificar a resposta do servidor
-      final List<dynamic> decodedData = json.decode(response.body);
+      if (response.statusCode == 200) {
+        // Decodificar a resposta do servidor
+        final List<dynamic> decodedData = json.decode(response.body);
 
-      // Atualizar o estado com os dados
-      setState(() {
-        athletes = List<Map<String, dynamic>>.from(decodedData);
-      });
-    } else {
-      // Exibir uma mensagem de erro caso a resposta não seja 200
-      _showErrorDialog('Erro ao carregar atletas. Código: ${response.statusCode}');
+        // Atualizar o estado com os dados
+        setState(() {
+          athletes = List<Map<String, dynamic>>.from(decodedData);
+        });
+      } else {
+        // Exibir uma mensagem de erro caso a resposta não seja 200
+        _showErrorDialog('Erro ao carregar atletas. Código: ${response.statusCode}');
+      }
+    } catch (e) {
+      // Tratar erros de conexão ou outros problemas
+      _showErrorDialog('Erro de conexão: ${e.toString()}');
     }
-  } catch (e) {
-    // Tratar erros de conexão ou outros problemas
-    _showErrorDialog('Erro de conexão: ${e.toString()}');
   }
-}
 
+  Future<void> _fetchReports() async {
+    const String url = 'http://192.168.0.27:3000/relatorios';
+    try {
+      final response = await http.get(Uri.parse(url));
+
+      if (response.statusCode == 200) {
+        // Decodificar a resposta do servidor
+        final List<dynamic> decodedData = json.decode(response.body);
+
+        // Atualizar o estado com os relatórios
+        setState(() {
+          reports = List<Map<String, dynamic>>.from(decodedData);
+        });
+      } else {
+        // Exibir uma mensagem de erro caso a resposta não seja 200
+        _showErrorDialog('Erro ao carregar relatórios. Código: ${response.statusCode}');
+      }
+    } catch (e) {
+      // Tratar erros de conexão ou outros problemas
+      _showErrorDialog('Erro de conexão: ${e.toString()}');
+    }
+  }
 
   void _showErrorDialog(String message) {
     showDialog(
@@ -72,6 +96,13 @@ Future<void> _fetchAthletes() async {
         athletes.sort((a, b) => (a['clube'] ?? '').compareTo(b['clube'] ?? ''));
       }
     });
+  }
+
+  List<Map<String, dynamic>> _filterByRating() {
+    return athletes.where((athlete) {
+      // Filtra os atletas conforme o rating selecionado
+      return athlete['rating'] == selectedRating;
+    }).toList();
   }
 
   Widget _buildPositionFilter() {
@@ -150,8 +181,26 @@ Future<void> _fetchAthletes() async {
     );
   }
 
+  // Função para obter o ratingFinalSelecionado de um atleta
+  int _getAthleteRating(String athleteId) {
+    // Encontrar o relatório correspondente ao atleta
+    final report = reports.firstWhere(
+      (report) => report['atleta_id'] == athleteId,
+      orElse: () => {},
+    );
+    // Retornar o ratingFinalSelecionado do relatório, ou 0 caso não exista
+    return report.isNotEmpty ? report['ratingFinalSelecionado'] ?? 0 : 0;
+  }
+
   @override
   Widget build(BuildContext context) {
+    List<Map<String, dynamic>> filteredAthletes = athletes;
+
+    // Aplica o filtro de rating se o filtro de rating estiver ativo
+    if (selectedRating != 3) {
+      filteredAthletes = _filterByRating();
+    }
+
     return Scaffold(
       body: Column(
         children: [
@@ -233,16 +282,18 @@ Future<void> _fetchAthletes() async {
           ),
           Expanded(
             child: ListView.builder(
-              itemCount: athletes.length,
+              itemCount: filteredAthletes.length,
               itemBuilder: (context, index) {
-                final athlete = athletes[index];
+                final athlete = filteredAthletes[index];
+             final athleteRating = _getAthleteRating(athlete['id'].toString());  // Obtendo rating do relatório
+
                 return ListTile(
                   title: Text(athlete['nome']),
                   subtitle: Text('Clube: ${athlete['clube']}'),
                   trailing: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text('${athlete['rating']}'),
+                      Text('$athleteRating'),
                       const Icon(Icons.star, color: Colors.orange),
                     ],
                   ),

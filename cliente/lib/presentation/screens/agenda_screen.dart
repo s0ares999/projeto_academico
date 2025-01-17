@@ -18,7 +18,7 @@ class _AgendaScreenState extends State<AgendaScreen> {
 
   // Função para carregar as partidas da API
   Future<void> _carregarPartidas() async {
-    final response = await http.get(Uri.parse('http://192.168.1.118:3000/partidas'));
+    final response = await http.get(Uri.parse('http://192.168.0.27:3000/partidas'));
 
     if (response.statusCode == 200) {
       setState(() {
@@ -45,10 +45,10 @@ class _AgendaScreenState extends State<AgendaScreen> {
                 var local = partida['local'];
 
                 return Card(
-                  margin: EdgeInsets.all(10),
+                  margin: EdgeInsets.all(12),
                   child: ListTile(
                     title: Text('$timeMandante vs $timeVisitante'),
-                    subtitle: Text('Data: $data, Hora: $hora, Local: $local'),
+                    subtitle: Text('Data: $data, Hora: $hora  Local: $local'),
                     isThreeLine: true,
                     onTap: () {
                       // Ação ao clicar em uma partida (pode ser detalhamento ou outra ação)

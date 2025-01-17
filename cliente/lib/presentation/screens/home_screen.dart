@@ -47,49 +47,44 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
-  Map<String, dynamic>? nextMatch;
+  List<dynamic>? nextMatch;  // Lista para armazenar todas as partidas
 
   final List<Widget> _screens = [];
 
   @override
   void initState() {
     super.initState();
-    _fetchNextMatch();
+    _fetchMatches();  // Chama a função para carregar as partidas
   }
 
-  
+  // Função para carregar todas as partidas
+  Future<void> _fetchMatches() async {
+    try {
+      final response = await http.get(Uri.parse('http://192.168.0.27:3000/partidas'));
 
- Future<void> _fetchNextMatch() async {
-  try {
-    final response = await http.get(Uri.parse('http://192.168.1.118:3000/partidas'));
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        print('Resposta da API: $data'); // Para depuração
 
-    if (response.statusCode == 200) {
-      final data = json.decode(response.body);
-      print('Resposta da API: $data'); // Adicione este print para depuração
-
-      if (data['partidas'] != null && data['partidas'].isNotEmpty) {
-        // Pega a última partida criada, sem filtrar apenas as futuras
-        var lastMatch = (data['partidas'] as List).last;
-
-        setState(() {
-          nextMatch = lastMatch; // Pega a última partida
-        });
+        if (data['partidas'] != null && data['partidas'].isNotEmpty) {
+          setState(() {
+            nextMatch = data['partidas']; // Armazena todas as partidas
+          });
+        } else {
+          setState(() {
+            nextMatch = null; // Nenhuma partida encontrada
+          });
+        }
       } else {
-        setState(() {
-          nextMatch = null; // Nenhuma partida encontrada
-        });
+        throw Exception('Erro ao carregar partidas, código: ${response.statusCode}');
       }
-    } else {
-      throw Exception('Erro ao carregar partida, código: ${response.statusCode}');
+    } catch (e) {
+      print('Erro ao buscar partidas: $e');
+      setState(() {
+        nextMatch = null; // Se ocorrer erro na requisição
+      });
     }
-  } catch (e) {
-    print('Erro ao buscar partida: $e'); // Exibe erro no console
-    setState(() {
-      nextMatch = null; // Se ocorrer erro na requisição
-    });
   }
-}
-
 
   void _onItemTapped(int index) {
     setState(() {
@@ -252,7 +247,7 @@ class _HomeScreenState extends State<HomeScreen> {
 }
 
 class HomePageContent extends StatelessWidget {
-  final Map<String, dynamic>? nextMatch;
+  final List<dynamic>? nextMatch;
 
   const HomePageContent({super.key, this.nextMatch});
 
@@ -279,54 +274,59 @@ class HomePageContent extends StatelessWidget {
               ],
             ),
             child: nextMatch != null
-                ? Column(
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Column(
-                            children: [
-                              Text(
-                                nextMatch!['timeMandante'],
-                                style: TextStyle(
-                                    fontWeight: FontWeight.bold, fontSize: 12),
-                              ),
-                            ],
-                          ),
-                          Column(
-                            children: [
-                              Text(
-                                nextMatch!['hora'],
-                                style: TextStyle(
-                                    color: Colors.orange,
-                                    fontSize: 26,
-                                    fontWeight: FontWeight.bold),
-                              ),
-                              Text(
-                                DateTime.parse(nextMatch!['data'])
-                                    .toLocal()
-                                    .toString()
-                                    .substring(0, 10),
-                                style:
-                                    TextStyle(color: Colors.grey, fontSize: 10),
-                              ),
-                            ],
-                          ),
-                          Column(
-                            children: [
-                              Text(
-                                nextMatch!['timeVisitante'],
-                                style: TextStyle(
-                                    fontWeight: FontWeight.bold, fontSize: 12),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ],
+                ? ListView.builder(
+                    shrinkWrap: true,
+                    itemCount: nextMatch!.length,
+                    itemBuilder: (context, index) {
+                      var match = nextMatch![index];
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 16.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Column(
+                              children: [
+                                Text(
+                                  match['timeMandante'],
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.bold, fontSize: 12),
+                                ),
+                              ],
+                            ),
+                            Column(
+                              children: [
+                                Text(
+                                  match['hora'],
+                                  style: TextStyle(
+                                      color: Colors.orange,
+                                      fontSize: 26,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                                Text(
+                                  DateTime.parse(match['data'])
+                                      .toLocal()
+                                      .toString()
+                                      .substring(0, 10),
+                                  style: TextStyle(color: Colors.grey, fontSize: 10),
+                                ),
+                              ],
+                            ),
+                            Column(
+                              children: [
+                                Text(
+                                  match['timeVisitante'],
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.bold, fontSize: 12),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      );
+                    },
                   )
                 : Text(
-                    "Nenhum jogo encontrado.",
+                    "Nenhuma partida encontrada.",
                     style: TextStyle(color: Colors.grey),
                   ),
           ),

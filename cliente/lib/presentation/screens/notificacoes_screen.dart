@@ -10,6 +10,7 @@ class NotificacoesScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.black,
+        iconTheme: IconThemeData(color: Colors.white),
         title: Text('Notificações', style: TextStyle(color: Colors.white)),
         actions: [
           TextButton(

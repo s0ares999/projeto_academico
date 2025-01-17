@@ -57,7 +57,7 @@ class _HomeScreenConsultorState extends State<HomeScreenConsultor> {
   Future<void> _fetchNextMatch() async {
     try {
       final response =
-          await http.get(Uri.parse('http://192.168.1.118:3000/partidas'));
+          await http.get(Uri.parse('http://192.168.0.27:3000/partidas'));
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);

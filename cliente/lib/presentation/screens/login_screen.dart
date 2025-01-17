@@ -1,5 +1,3 @@
-// ignore_for_file: depend_on_referenced_packages
-
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -35,7 +33,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
     try {
       final response = await http.post(
-        Uri.parse('http://192.168.1.118:3000/auth/login'),
+        Uri.parse('http://192.168.0.27:3000/auth/login'),
         headers: <String, String>{
           'Content-Type': 'application/json',
         },
@@ -45,67 +43,67 @@ class _LoginScreenState extends State<LoginScreen> {
         }),
       );
 
-      print("Request URL: ${Uri.parse('http://192.168.1.118:3000/auth/login')}");
+      print("Request URL: ${Uri.parse('http://192.168.0.27:3000/auth/login')}");
       print("Response Status: ${response.statusCode}");
       print('Response Body: ${response.body}');
 
       // Verificando status e corpo da resposta
       if (response.statusCode == 200) {
-  final Map<String, dynamic> responseData = jsonDecode(response.body);
-  final String token = responseData['token'];
-  final String userId = responseData['id'].toString(); // Converte para String
-  final String userRole = responseData['role'];
+        final Map<String, dynamic> responseData = jsonDecode(response.body);
+        final String token = responseData['token'];
+        final String userId = responseData['id'].toString(); // Converte para String
+        final String userRole = responseData['role'];
 
-  // Limpar dados de login anteriores
-  SharedPreferences prefs = await SharedPreferences.getInstance();
-  prefs.remove('token');
-  prefs.remove('userId');
-  prefs.remove('userRole');
+        // Limpar dados de login anteriores
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        prefs.remove('token');
+        prefs.remove('userId');
+        prefs.remove('userRole');
 
-  // Armazenar o token e os dados do usuário
-  prefs.setString('token', token);
-  prefs.setString('userId', userId);
-  prefs.setString('userRole', userRole);
+        // Armazenar o token e os dados do usuário
+        prefs.setString('token', token);
+        prefs.setString('userId', userId);
+        prefs.setString('userRole', userRole);
 
-  // Verificar e exibir os dados armazenados para depuração
-  print('Token: $token');
-  print('User Id: $userId');
-  print('User Role: $userRole');
+        // Verificar e exibir os dados armazenados para depuração
+        print('Token: $token');
+        print('User Id: $userId');
+        print('User Role: $userRole');
 
-  // Navegar para a tela correspondente ao papel do usuário
-  try {
-    if (userRole == 'Admin' || userRole == 'Scout') {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const HomeScreen()),
-      );
-    } else if (userRole == 'Consultor') {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const HomeScreenConsultor()),
-      );
-    }
-  } catch (e) {
-    print("Erro ao navegar: $e");
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('Erro ao navegar'),
-          content: Text('Erro ao navegar para a próxima tela: $e'),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('OK'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-}     else {
+        // Navegar para a tela correspondente ao papel do usuário
+        try {
+          if (userRole == 'Admin' || userRole == 'Scout') {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const HomeScreen()),
+            );
+          } else if (userRole == 'Consultor') {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const HomeScreenConsultor()),
+            );
+          }
+        } catch (e) {
+          print("Erro ao navegar: $e");
+          showDialog(
+            context: context,
+            builder: (context) {
+              return AlertDialog(
+                title: const Text('Erro ao navegar'),
+                content: Text('Erro ao navegar para a próxima tela: $e'),
+                actions: [
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    child: const Text('OK'),
+                  ),
+                ],
+              );
+            },
+          );
+        }
+      } else {
         final Map<String, dynamic> responseData = jsonDecode(response.body);
         String errorMessage = responseData['message'] ?? 'Nome de utilizador ou palavra-passe incorretos';
 
@@ -164,7 +162,16 @@ class _LoginScreenState extends State<LoginScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const SizedBox(height: 130),
+                const SizedBox(height: 10),
+                // Logo Acadêmico
+                Center(
+                  child: Image.asset(
+                    'assets/images/logoacademico.png',
+                    width: 100,  // Ajuste o tamanho conforme necessário
+                    height: 100,
+                  ),
+                ),
+                const SizedBox(height: 30),
                 const Text(
                   'Login',
                   style: TextStyle(
