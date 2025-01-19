@@ -33,7 +33,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
     try {
       final response = await http.post(
-        Uri.parse('http://192.168.0.27:3000/auth/login'),
+        Uri.parse('http://192.168.8.135:3000/auth/login'),
         headers: <String, String>{
           'Content-Type': 'application/json',
         },
@@ -43,7 +43,7 @@ class _LoginScreenState extends State<LoginScreen> {
         }),
       );
 
-      print("Request URL: ${Uri.parse('http://192.168.0.27:3000/auth/login')}");
+      print("Request URL: ${Uri.parse('http://192.168.8.135:3000/auth/login')}");
       print("Response Status: ${response.statusCode}");
       print('Response Body: ${response.body}');
 

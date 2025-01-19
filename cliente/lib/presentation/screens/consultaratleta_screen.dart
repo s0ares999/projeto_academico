@@ -21,11 +21,11 @@ class _ConsultarAtletaScreenState extends State<ConsultarAtletaScreen> {
   void initState() {
     super.initState();
     _fetchAthletes(); // Busca os atletas
-    _fetchReports();  // Busca os relatórios
+    _fetchReports(); // Busca os relatórios
   }
 
   Future<void> _fetchAthletes() async {
-    const String url = 'http://192.168.0.27:3000/atletas';
+    const String url = 'http://192.168.8.135:3000/atletas';
     try {
       final response = await http.get(Uri.parse(url));
 
@@ -39,7 +39,8 @@ class _ConsultarAtletaScreenState extends State<ConsultarAtletaScreen> {
         });
       } else {
         // Exibir uma mensagem de erro caso a resposta não seja 200
-        _showErrorDialog('Erro ao carregar atletas. Código: ${response.statusCode}');
+        _showErrorDialog(
+            'Erro ao carregar atletas. Código: ${response.statusCode}');
       }
     } catch (e) {
       // Tratar erros de conexão ou outros problemas
@@ -48,7 +49,7 @@ class _ConsultarAtletaScreenState extends State<ConsultarAtletaScreen> {
   }
 
   Future<void> _fetchReports() async {
-    const String url = 'http://192.168.0.27:3000/relatorios';
+    const String url = 'http://192.168.8.135:3000/relatorios';
     try {
       final response = await http.get(Uri.parse(url));
 
@@ -62,7 +63,8 @@ class _ConsultarAtletaScreenState extends State<ConsultarAtletaScreen> {
         });
       } else {
         // Exibir uma mensagem de erro caso a resposta não seja 200
-        _showErrorDialog('Erro ao carregar relatórios. Código: ${response.statusCode}');
+        _showErrorDialog(
+            'Erro ao carregar relatórios. Código: ${response.statusCode}');
       }
     } catch (e) {
       // Tratar erros de conexão ou outros problemas
@@ -91,7 +93,8 @@ class _ConsultarAtletaScreenState extends State<ConsultarAtletaScreen> {
   void _sortAthletes(String criterion) {
     setState(() {
       if (criterion == 'Ano') {
-        athletes.sort((a, b) => (a['data_nascimento'] ?? '').compareTo(b['data_nascimento'] ?? ''));
+        athletes.sort((a, b) =>
+            (a['data_nascimento'] ?? '').compareTo(b['data_nascimento'] ?? ''));
       } else if (criterion == 'Clube') {
         athletes.sort((a, b) => (a['clube'] ?? '').compareTo(b['clube'] ?? ''));
       }
@@ -107,18 +110,27 @@ class _ConsultarAtletaScreenState extends State<ConsultarAtletaScreen> {
 
   Widget _buildPositionFilter() {
     final positions = [
-      'Guarda Redes', 'Defesa Central', 'Lateral Esquerdo', 'Lateral Direito',
-      'Médio Central', 'Médio Ofensivo', 'Médio Defensivo', 'Extremo Direito',
-      'Extremo Esquerdo', 'Atacante', 'Universal'
+      'Guarda Redes',
+      'Defesa Central',
+      'Lateral Esquerdo',
+      'Lateral Direito',
+      'Médio Central',
+      'Médio Ofensivo',
+      'Médio Defensivo',
+      'Extremo Direito',
+      'Extremo Esquerdo',
+      'Atacante'
     ];
 
     return Column(
       children: [
         GridView.builder(
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 3,
+            crossAxisCount: 2,
             crossAxisSpacing: 10.0,
             mainAxisSpacing: 10.0,
+            childAspectRatio:
+                1.5, // Ajuste a proporção largura/altura dos cards
           ),
           itemCount: positions.length,
           shrinkWrap: true,
@@ -127,21 +139,34 @@ class _ConsultarAtletaScreenState extends State<ConsultarAtletaScreen> {
             return ElevatedButton(
               onPressed: () {
                 setState(() {
-                  selectedPosition = selectedPosition == positions[index] ? '' : positions[index];
+                  selectedPosition = selectedPosition == positions[index]
+                      ? ''
+                      : positions[index];
                 });
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: selectedPosition == positions[index] ? Colors.orange : Colors.grey[300],
+                padding:
+                    const EdgeInsets.all(8), // Adiciona mais espaço interno
+                backgroundColor: selectedPosition == positions[index]
+                    ? Colors.orange
+                    : Colors.grey[300],
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),
               ),
-              child: Text(
-                positions[index],
-                style: TextStyle(
-                  color: selectedPosition == positions[index] ? Colors.white : Colors.black,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 12,
+              child: FittedBox(
+                fit: BoxFit
+                    .scaleDown, // Ajusta automaticamente o texto ao espaço
+                child: Text(
+                  positions[index],
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: selectedPosition == positions[index]
+                        ? Colors.white
+                        : Colors.black,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14, // Pode ajustar o tamanho da fonte
+                  ),
                 ),
               ),
             );
@@ -152,7 +177,8 @@ class _ConsultarAtletaScreenState extends State<ConsultarAtletaScreen> {
           onPressed: () => Navigator.of(context).pop(),
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.orange,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
           ),
           child: const Text(
             'Aplicar',
@@ -263,7 +289,9 @@ class _ConsultarAtletaScreenState extends State<ConsultarAtletaScreen> {
                           filters[index],
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
-                            color: selectedFilter == index ? Colors.orange : Colors.black,
+                            color: selectedFilter == index
+                                ? Colors.orange
+                                : Colors.black,
                           ),
                         ),
                         if (selectedFilter == index)
@@ -285,17 +313,46 @@ class _ConsultarAtletaScreenState extends State<ConsultarAtletaScreen> {
               itemCount: filteredAthletes.length,
               itemBuilder: (context, index) {
                 final athlete = filteredAthletes[index];
-             final athleteRating = _getAthleteRating(athlete['id'].toString());  // Obtendo rating do relatório
+                final athleteRating = _getAthleteRating(
+                    athlete['id'].toString()); // Obtendo rating do relatório
 
-                return ListTile(
-                  title: Text(athlete['nome']),
-                  subtitle: Text('Clube: ${athlete['clube']}'),
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text('$athleteRating'),
-                      const Icon(Icons.star, color: Colors.orange),
+                return Container(
+                  margin: const EdgeInsets.symmetric(
+                      vertical: 6.0,
+                      horizontal:
+                          16.0), // Margem para dar espaço entre os itens
+                  decoration: BoxDecoration(
+                    color: Colors.white, // Cor de fundo do item
+                    borderRadius:
+                        BorderRadius.circular(10), // Borda arredondada
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey
+                            .withOpacity(0.3), // Cor e opacidade da sombra
+                        spreadRadius: 2, // Quanto a sombra se espalha
+                        blurRadius: 5, // Intensidade do desfoque
+                        offset: Offset(0, 2), // Posição da sombra
+                      ),
                     ],
+                  ),
+                  child: ListTile(
+                    title: Text(athlete['nome']),
+                    subtitle: Text(
+                      'Clube: ${athlete['clube']}\nPosição: ${athlete['posicao']}',
+                    ),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text('$athleteRating'),
+                        const Icon(Icons.star, color: Colors.orange),
+                      ],
+                    ),
+                    contentPadding:
+                        EdgeInsets.symmetric(vertical: 10.0, horizontal: 16.0),
+                    tileColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
                   ),
                 );
               },

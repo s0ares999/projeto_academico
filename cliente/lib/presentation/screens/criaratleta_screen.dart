@@ -17,14 +17,27 @@ class _CriarAtletaScreenState extends State<CriarAtletaScreen> {
       TextEditingController();
   final TextEditingController _nacionalidadeController =
       TextEditingController();
-  final TextEditingController _posicaoController = TextEditingController();
   final TextEditingController _linkController = TextEditingController();
   final TextEditingController _nomeAgenteController = TextEditingController();
   final TextEditingController _contactoAgenteController =
       TextEditingController();
 
   String? _clubeIdSelecionado;
+  String? _posicaoSelecionada;
   List<Map<String, dynamic>> _clubes = [];
+  
+  final List<String> _posicoes = [
+    'Guarda-Redes',
+    'Defesa Central',
+    'Lateral Esquerdo',
+    'Lateral Direito',
+    'Médio Central',
+    'Médio Ofensivo',
+    'Médio Defensivo',
+    'Extremo Direito',
+    'Extremo Esquerdo',
+    'Atacante',
+  ];
 
   @override
   void initState() {
@@ -33,7 +46,7 @@ class _CriarAtletaScreenState extends State<CriarAtletaScreen> {
   }
 
   Future<void> _carregarClubes() async {
-    const String url = 'http://192.168.0.27:3000/times';
+    const String url = 'http://192.168.8.135:3000/times';
     print('Iniciando o carregamento dos clubes...');
     try {
       final response = await http.get(Uri.parse(url));
@@ -56,13 +69,13 @@ class _CriarAtletaScreenState extends State<CriarAtletaScreen> {
   }
 
   Future<void> _criarAtleta() async {
-    const String url = 'http://192.168.0.27:3000/atletas';
+    const String url = 'http://192.168.8.135:3000/atletas';
     print('Iniciando a criação do atleta...');
 
     if (_nomeController.text.trim().isEmpty ||
         _dataNascimentoController.text.trim().isEmpty ||
         _nacionalidadeController.text.trim().isEmpty ||
-        _posicaoController.text.trim().isEmpty ||
+        _posicaoSelecionada == null ||
         _clubeIdSelecionado == null) {
       print('Erro: Campos obrigatórios faltando');
       _showErrorDialog('Por favor, preencha todos os campos obrigatórios.');
@@ -77,7 +90,7 @@ class _CriarAtletaScreenState extends State<CriarAtletaScreen> {
       'nome': _nomeController.text.trim(),
       'dataNascimento': formattedDate,
       'nacionalidade': _nacionalidadeController.text.trim(),
-      'posicao': _posicaoController.text.trim(),
+      'posicao': _posicaoSelecionada,
       'clube': _clubeIdSelecionado,
       'link': _linkController.text.trim(),
       'agente': _nomeAgenteController.text.trim(),
@@ -188,15 +201,15 @@ class _CriarAtletaScreenState extends State<CriarAtletaScreen> {
               const SizedBox(height: 10),
               _buildTextField('Nacionalidade', _nacionalidadeController),
               const SizedBox(height: 10),
-              _buildTextField('Posição', _posicaoController),
+              _buildPositionDropdown(),
               const SizedBox(height: 10),
               _buildDropdownField('Clube', _clubeIdSelecionado, _clubes),
               const SizedBox(height: 10),
               _buildTextField('Link', _linkController),
               const SizedBox(height: 10),
-              _buildTextField('Nome do Agente', _nomeAgenteController),
+              _buildTextField('Nome do Agente/Encarregado de Educação', _nomeAgenteController),
               const SizedBox(height: 10),
-              _buildTextField('Contato do Agente', _contactoAgenteController),
+              _buildTextField('Contacto do Agente/Encarregado de Educação', _contactoAgenteController),
               const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: _criarAtleta,
@@ -263,6 +276,32 @@ class _CriarAtletaScreenState extends State<CriarAtletaScreen> {
     );
   }
 
+  Widget _buildPositionDropdown() {
+    return DropdownButtonFormField<String>(
+      value: _posicaoSelecionada,
+      hint: const Text('Selecione a posição'),
+      onChanged: (String? novoValor) {
+        setState(() {
+          _posicaoSelecionada = novoValor;
+        });
+      },
+      items: _posicoes.map((posicao) {
+        return DropdownMenuItem<String>(
+          value: posicao,
+          child: Text(posicao),
+        );
+      }).toList(),
+      decoration: InputDecoration(
+        labelText: 'Posição',
+        filled: true,
+        fillColor: Colors.white,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+      ),
+    );
+  }
+
   Widget _buildDropdownField(
       String label, String? value, List<Map<String, dynamic>> items) {
     return DropdownButtonFormField<String>(
@@ -275,7 +314,7 @@ class _CriarAtletaScreenState extends State<CriarAtletaScreen> {
       },
       items: items.map((item) {
         return DropdownMenuItem<String>(
-          value: item['nome'], // Aqui passamos o nome em vez do id
+          value: item['nome'],
           child: Text(item['nome']),
         );
       }).toList(),
@@ -284,12 +323,6 @@ class _CriarAtletaScreenState extends State<CriarAtletaScreen> {
         filled: true,
         fillColor: Colors.white,
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-        ),
-        focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
         ),
       ),

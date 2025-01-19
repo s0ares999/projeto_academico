@@ -9,6 +9,7 @@ import 'criaratleta_screen.dart';
 import 'consultaratleta_screen.dart';
 import 'criarrelatorio_screen.dart';
 import 'package:provider/provider.dart';
+import 'package:intl/intl.dart';
 
 void main() {
   runApp(const MyApp());
@@ -47,42 +48,54 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
-  List<dynamic>? nextMatch;  // Lista para armazenar todas as partidas
+  List<dynamic>? nextMatch; // Lista para armazenar todas as partidas
 
   final List<Widget> _screens = [];
 
   @override
   void initState() {
     super.initState();
-    _fetchMatches();  // Chama a função para carregar as partidas
+    _fetchMatches(); // Chama a função para carregar as partidas
   }
 
-  // Função para carregar todas as partidas
   Future<void> _fetchMatches() async {
     try {
-      final response = await http.get(Uri.parse('http://192.168.0.27:3000/partidas'));
+      final response =
+          await http.get(Uri.parse('http://192.168.8.135:3000/partidas'));
 
       if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        print('Resposta da API: $data'); // Para depuração
+        final List<dynamic> data = json.decode(response.body);
+        print('Resposta da API: $data');
 
-        if (data['partidas'] != null && data['partidas'].isNotEmpty) {
+        if (data!=[]) {
           setState(() {
-            nextMatch = data['partidas']; // Armazena todas as partidas
+            nextMatch = data.map((match) {
+              print(
+                  'Partida: ${match['timeMandanteId']} - ${match['timeVisitanteId']}');
+              return {
+                'timeMandanteId': match['timeMandante']['id'],
+                'timeVisitanteId': match['timeVisitante']['id'],
+                'hora': match['hora'],
+                'data': DateTime.parse(match['data']), // Verificar o formato
+                'jogadoresIds': List<int>.from(
+                    match['jogadores'].map((jogador) => jogador['id'])),
+                'scoutsIds':
+                    List<int>.from(match['scouts'].map((scout) => scout['id'])),
+                'local': match['local'],
+              };
+            }).toList();
           });
         } else {
           setState(() {
-            nextMatch = null; // Nenhuma partida encontrada
+            nextMatch = null;
           });
         }
       } else {
-        throw Exception('Erro ao carregar partidas, código: ${response.statusCode}');
+        throw Exception(
+            'Erro ao carregar partidas, código: ${response.statusCode}');
       }
     } catch (e) {
       print('Erro ao buscar partidas: $e');
-      setState(() {
-        nextMatch = null; // Se ocorrer erro na requisição
-      });
     }
   }
 
@@ -253,6 +266,8 @@ class HomePageContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print('AAAAAAAAAAAAAAAAAAAAAAAA: $nextMatch');
+
     return Padding(
       padding: const EdgeInsets.all(12.0),
       child: Column(
@@ -273,50 +288,75 @@ class HomePageContent extends StatelessWidget {
                 ),
               ],
             ),
-            child: nextMatch != null
+            child: nextMatch != null && nextMatch!.isNotEmpty
                 ? ListView.builder(
                     shrinkWrap: true,
                     itemCount: nextMatch!.length,
                     itemBuilder: (context, index) {
                       var match = nextMatch![index];
+                      // Verificar os dados recebidos
+                      print('Partida: $match');
+
                       return Padding(
                         padding: const EdgeInsets.only(bottom: 16.0),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
+                            // Verificando se os dados existem antes de acessá-los
                             Column(
                               children: [
                                 Text(
-                                  match['timeMandante'],
+                                  'Mandante: ${match['timeMandanteId'] ?? "Desconhecido"}', // Previne erro caso esteja nulo
                                   style: TextStyle(
-                                      fontWeight: FontWeight.bold, fontSize: 12),
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 12),
+                                ),
+                                Text(
+                                  'Jogadores: ${match['jogadoresIds']?.length ?? 0}', // Verifica se 'jogadoresIds' não é null
+                                  style: TextStyle(
+                                      fontSize: 12, color: Colors.grey),
                                 ),
                               ],
                             ),
                             Column(
                               children: [
                                 Text(
-                                  match['hora'],
+                                  match['hora'] ??
+                                      'Hora não disponível', // Verifica se a hora existe
                                   style: TextStyle(
-                                      color: Colors.orange,
-                                      fontSize: 26,
-                                      fontWeight: FontWeight.bold),
+                                    color: Colors.orange,
+                                    fontSize: 26,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
                                 Text(
-                                  DateTime.parse(match['data'])
-                                      .toLocal()
-                                      .toString()
-                                      .substring(0, 10),
-                                  style: TextStyle(color: Colors.grey, fontSize: 10),
+                                  match['data'] != null
+                                      ? DateFormat('yyyy-MM-dd')
+                                          .format(match['data']!)
+                                      : 'Data inválida', // Se a data for null
+                                  style: TextStyle(
+                                      color: Colors.grey, fontSize: 10),
+                                ),
+                                Text(
+                                  match['local'] ??
+                                      'Local não especificado', // Verifica se o local existe
+                                  style: TextStyle(
+                                      color: Colors.grey, fontSize: 12),
                                 ),
                               ],
                             ),
                             Column(
                               children: [
                                 Text(
-                                  match['timeVisitante'],
+                                  'Visitante: ${match['timeVisitanteId'] ?? "Desconhecido"}',
                                   style: TextStyle(
-                                      fontWeight: FontWeight.bold, fontSize: 12),
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 12),
+                                ),
+                                Text(
+                                  'Scouts: ${match['scoutsIds']?.length ?? 0}',
+                                  style: TextStyle(
+                                      fontSize: 12, color: Colors.grey),
                                 ),
                               ],
                             ),
@@ -325,9 +365,11 @@ class HomePageContent extends StatelessWidget {
                       );
                     },
                   )
-                : Text(
-                    "Nenhuma partida encontrada.",
-                    style: TextStyle(color: Colors.grey),
+                : Center(
+                    child: Text(
+                      "Nenhuma partida encontrada.",
+                      style: TextStyle(color: Colors.grey),
+                    ),
                   ),
           ),
           SizedBox(height: 24),
@@ -353,7 +395,7 @@ class HomePageContent extends StatelessWidget {
                 color: Colors.white, // Cor do texto branca
               ),
             ),
-          )
+          ),
         ],
       ),
     );
