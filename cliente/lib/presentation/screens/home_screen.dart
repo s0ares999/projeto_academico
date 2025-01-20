@@ -9,7 +9,6 @@ import 'criaratleta_screen.dart';
 import 'consultaratleta_screen.dart';
 import 'criarrelatorio_screen.dart';
 import 'package:provider/provider.dart';
-import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
@@ -49,16 +48,14 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
-  String _userName = '';  // Variável para armazenar o nome do usuário
-  List<dynamic>? nextMatch; // Lista para armazenar todas as partidas
+  String _userName = ''; // Variável para armazenar o nome do usuário
 
   final List<Widget> _screens = [];
 
   @override
   void initState() {
     super.initState();
-    _fetchUserName();  // Chama a função para buscar o nome do usuário
-    _fetchMatches(); // Chama a função para carregar as partidas
+    _fetchUserName(); // Chama a função para buscar o nome do usuário
   }
 
   // Função para buscar o nome do usuário
@@ -74,7 +71,8 @@ class _HomeScreenState extends State<HomeScreen> {
         if (response.statusCode == 200) {
           final Map<String, dynamic> data = json.decode(response.body);
           setState(() {
-            _userName = data['nome'] ?? 'Nome não encontrado'; // Supondo que a resposta contenha o campo 'nome'
+            _userName = data['nome'] ??
+                'Nome não encontrado'; // Supondo que a resposta contenha o campo 'nome'
           });
         } else {
           setState(() {
@@ -90,47 +88,6 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  Future<void> _fetchMatches() async {
-    try {
-      final response =
-          await http.get(Uri.parse('http://192.168.8.135:3000/partidas'));
-
-      if (response.statusCode == 200) {
-        final List<dynamic> data = json.decode(response.body);
-        print('Resposta da API: $data');
-
-        if (data != []) {
-          setState(() {
-            nextMatch = data.map((match) {
-              print(
-                  'Partida: ${match['timeMandanteId']} - ${match['timeVisitanteId']}');
-              return {
-                'timeMandanteId': match['timeMandante']['id'],
-                'timeVisitanteId': match['timeVisitante']['id'],
-                'hora': match['hora'],
-                'data': DateTime.parse(match['data']), // Verificar o formato
-                'jogadoresIds': List<int>.from(
-                    match['jogadores'].map((jogador) => jogador['id'])),
-                'scoutsIds':
-                    List<int>.from(match['scouts'].map((scout) => scout['id'])),
-                'local': match['local'],
-              };
-            }).toList();
-          });
-        } else {
-          setState(() {
-            nextMatch = null;
-          });
-        }
-      } else {
-        throw Exception(
-            'Erro ao carregar partidas, código: ${response.statusCode}');
-      }
-    } catch (e) {
-      print('Erro ao buscar partidas: $e');
-    }
-  }
-
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
@@ -140,10 +97,11 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     _screens.addAll([
-      HomePageContent(nextMatch: nextMatch),
+      HomePageContent(),
       AgendaScreen(),
       CriarAtletaScreen(),
       ConsultarAtletaScreen(),
+      CriarRelatorioScreen(), // Adiciona a tela de criar relatório
     ]);
 
     return Scaffold(
@@ -162,7 +120,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    _userName.isEmpty ? 'Carregando...' : _userName,  // Exibe o nome ou 'Carregando...'
+                    _userName.isEmpty
+                        ? 'Carregando...'
+                        : _userName, // Exibe o nome ou 'Carregando...'
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 20,
@@ -173,11 +133,14 @@ class _HomeScreenState extends State<HomeScreen> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       IconButton(
-                        icon: Icon(Icons.notifications, color: Colors.white, size: 20),
+                        icon: Icon(Icons.notifications,
+                            color: Colors.white, size: 20),
                         onPressed: () {
                           Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (context) => NotificacoesScreen(userId: 'userId')),
+                            MaterialPageRoute(
+                                builder: (context) =>
+                                    NotificacoesScreen(userId: 'userId')),
                           );
                         },
                       ),
@@ -186,7 +149,8 @@ class _HomeScreenState extends State<HomeScreen> {
                         onPressed: () {
                           Navigator.pushReplacement(
                             context,
-                            MaterialPageRoute(builder: (context) => LoginScreen()),
+                            MaterialPageRoute(
+                                builder: (context) => LoginScreen()),
                           );
                         },
                       ),
@@ -212,6 +176,30 @@ class _HomeScreenState extends State<HomeScreen> {
           Expanded(
             child: _screens[_selectedIndex],
           ),
+          // Botão para criar relatório
+          if (_selectedIndex == 0) //
+            Padding(
+              padding: const EdgeInsets.all(20.0),
+              child: ElevatedButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => CriarRelatorioScreen(),
+                    ),
+                  );
+                },
+                child: Text('Criar Relatório'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color.fromARGB(255, 0, 0, 0),
+                  padding: EdgeInsets.symmetric(vertical: 15, horizontal: 20),
+                  textStyle: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
         ],
       ),
       bottomNavigationBar: Padding(
@@ -289,144 +277,37 @@ class _HomeScreenState extends State<HomeScreen> {
 }
 
 class HomePageContent extends StatelessWidget {
-  final List<dynamic>? nextMatch;
-
-  const HomePageContent({super.key, this.nextMatch});
+  const HomePageContent({super.key});
 
   @override
   Widget build(BuildContext context) {
-    print('AAAAAAAAAAAAAAAAAAAAAAAA: $nextMatch');
-
     return Padding(
       padding: const EdgeInsets.all(12.0),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
+          SizedBox(height: 65),
+          // Mensagem de boas-vindas
+          Text(
+            "Bem-vindo ao Viriatus Scouting",
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
+            ),
+          ),
+          SizedBox(height: 8),
+          // Subtítulo adicional
+          Text(
+            "Sua plataforma de scouting de futebol",
+            style: TextStyle(
+              fontSize: 16,
+              color: Colors.grey,
+            ),
+          ),
           SizedBox(height: 16),
-          Container(
-            padding: EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(12),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.grey.withOpacity(0.6),
-                  spreadRadius: 4,
-                  blurRadius: 6,
-                  offset: Offset(0, 3),
-                ),
-              ],
-            ),
-            child: nextMatch != null && nextMatch!.isNotEmpty
-                ? ListView.builder(
-                    shrinkWrap: true,
-                    itemCount: nextMatch!.length,
-                    itemBuilder: (context, index) {
-                      var match = nextMatch![index];
-                      // Verificar os dados recebidos
-                      print('Partida: $match');
-
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 16.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            // Verificando se os dados existem antes de acessá-los
-                            Column(
-                              children: [
-                                Text(
-                                  'Mandante: ${match['timeMandanteId'] ?? "Desconhecido"}', // Previne erro caso esteja nulo
-                                  style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 12),
-                                ),
-                                Text(
-                                  'Jogadores: ${match['jogadoresIds']?.length ?? 0}', // Verifica se 'jogadoresIds' não é null
-                                  style: TextStyle(
-                                      fontSize: 12, color: Colors.grey),
-                                ),
-                              ],
-                            ),
-                            Column(
-                              children: [
-                                Text(
-                                  match['hora'] ??
-                                      'Hora não disponível', // Verifica se a hora existe
-                                  style: TextStyle(
-                                    color: Colors.orange,
-                                    fontSize: 26,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                Text(
-                                  match['data'] != null
-                                      ? DateFormat('yyyy-MM-dd')
-                                          .format(match['data']!)
-                                      : 'Data inválida', // Se a data for null
-                                  style: TextStyle(
-                                      color: Colors.grey, fontSize: 10),
-                                ),
-                                Text(
-                                  match['local'] ??
-                                      'Local não especificado', // Verifica se o local existe
-                                  style: TextStyle(
-                                      color: Colors.grey, fontSize: 12),
-                                ),
-                              ],
-                            ),
-                            Column(
-                              children: [
-                                Text(
-                                  'Visitante: ${match['timeVisitanteId'] ?? "Desconhecido"}',
-                                  style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 12),
-                                ),
-                                Text(
-                                  'Scouts: ${match['scoutsIds']?.length ?? 0}',
-                                  style: TextStyle(
-                                      fontSize: 12, color: Colors.grey),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      );
-                    },
-                  )
-                : Center(
-                    child: Text(
-                      "Nenhuma partida encontrada.",
-                      style: TextStyle(color: Colors.grey),
-                    ),
-                  ),
-          ),
-
-
+          // Logo
           SizedBox(height: 24),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => CriarRelatorioScreen()),
-              );
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.black, // Cor de fundo preta
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(14), // Bordas arredondadas
-              ),
-              padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-            ),
-            child: Text(
-              "Criar Relatório",
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: Colors.white, // Cor do texto branca
-              ),
-            ),
-          ),
         ],
       ),
     );

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:pi4_academico/presentation/screens/detalhespartida_screen.dart';
 
@@ -20,7 +21,9 @@ class _AgendaScreenState extends State<AgendaScreen> {
 
   // Função para carregar as partidas da API
   Future<void> _carregarPartidas() async {
-    final response = await http.get(Uri.parse('http://192.168.1.118:3000/partidas'));
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? userId = prefs.getString('userId');
+    final response = await http.get(Uri.parse('http://192.168.1.118:3000/partidas/atribuidas/$userId'));
 
     if (response.statusCode == 200) {
       setState(() {

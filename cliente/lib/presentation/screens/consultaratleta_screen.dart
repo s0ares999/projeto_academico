@@ -110,15 +110,11 @@ class _ConsultarAtletaScreenState extends State<ConsultarAtletaScreen> {
 
   Widget _buildPositionFilter() {
     final positions = [
-      'Guarda Redes',
+      'Guarda-Redes',
       'Defesa Central',
-      'Lateral Esquerdo',
-      'Lateral Direito',
-      'Médio Central',
-      'Médio Ofensivo',
-      'Médio Defensivo',
-      'Extremo Direito',
-      'Extremo Esquerdo',
+      'Defesa Esquerda',
+      'Defesa Direita',
+      'Médio',
       'Atacante'
     ];
 
