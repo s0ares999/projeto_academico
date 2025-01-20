@@ -28,7 +28,7 @@ class _NotificacoesScreenState extends State<NotificacoesScreen> {
   Future<void> fetchNotifications() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? userId = prefs.getString('userId');
-    final url = 'http://192.168.1.118:3000/Notificacao/utilizador/1';
+    final url = 'http://192.168.1.118:3000/Notificacao/utilizador/2';
 
     try {
       final response = await http.get(Uri.parse(url));
