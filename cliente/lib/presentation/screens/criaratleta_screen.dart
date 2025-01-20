@@ -42,7 +42,7 @@ class _CriarAtletaScreenState extends State<CriarAtletaScreen> {
   }
 
   Future<void> _carregarClubes() async {
-    const String url = 'http://192.168.1.118:3000/times';
+    const String url = 'https://pi4-hdnd.onrender.com/times';
     print('Iniciando o carregamento dos clubes...');
     try {
       final response = await http.get(Uri.parse(url));
@@ -65,7 +65,7 @@ class _CriarAtletaScreenState extends State<CriarAtletaScreen> {
   }
 
   Future<void> _criarAtleta() async {
-    const String url = 'http://192.168.1.118:3000/atletas';
+    const String url = 'https://pi4-hdnd.onrender.com/atletas';
     print('Iniciando a criação do atleta...');
 
     if (_nomeController.text.trim().isEmpty ||

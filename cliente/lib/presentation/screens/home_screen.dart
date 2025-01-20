@@ -65,7 +65,7 @@ class _HomeScreenState extends State<HomeScreen> {
     if (userId != null) {
       try {
         final response = await http.get(
-          Uri.parse('http://192.168.1.118:3000/utilizadores/$userId'),
+          Uri.parse('https://pi4-hdnd.onrender.com/utilizadores/$userId'),
         );
 
         if (response.statusCode == 200) {

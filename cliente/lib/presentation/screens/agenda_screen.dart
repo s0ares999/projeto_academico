@@ -23,7 +23,7 @@ class _AgendaScreenState extends State<AgendaScreen> {
   Future<void> _carregarPartidas() async {
       SharedPreferences prefs = await SharedPreferences.getInstance();
   String? userId = prefs.getString('userId');
-    final response = await http.get(Uri.parse('http://192.168.1.118:3000/partidas/atribuidas/$userId'));
+    final response = await http.get(Uri.parse('https://pi4-hdnd.onrender.com/partidas/atribuidas/$userId'));
 
     if (response.statusCode == 200) {
       setState(() {

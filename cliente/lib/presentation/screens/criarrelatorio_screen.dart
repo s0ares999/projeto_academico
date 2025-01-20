@@ -33,7 +33,7 @@ class _CriarRelatorioScreenState extends State<CriarRelatorioScreen> {
   }
 
   Future<void> _carregarAtletas() async {
-    const String urlAtletas = 'http://192.168.1.118:3000/atletas';
+    const String urlAtletas = 'https://pi4-hdnd.onrender.com/atletas';
     try {
       final response = await http.get(Uri.parse(urlAtletas));
       if (response.statusCode == 200) {
@@ -76,7 +76,7 @@ class _CriarRelatorioScreenState extends State<CriarRelatorioScreen> {
   }
 
   Future<void> _criarRelatorio() async {
-    const String urlRelatorio = 'http://192.168.1.118:3000/relatorios';
+    const String urlRelatorio = 'https://pi4-hdnd.onrender.com/relatorios';
 
     try {
       setState(() {

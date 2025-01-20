@@ -83,7 +83,7 @@ class _ConsultarAtletaScreenState extends State<ConsultarAtletaScreen> {
   }
 
   Future<void> _fetchAthletes() async {
-    const String url = 'http://192.168.1.118:3000/atletas';
+    const String url = 'https://pi4-hdnd.onrender.com/atletas';
     try {
       final response = await http.get(Uri.parse(url));
 
@@ -104,7 +104,7 @@ class _ConsultarAtletaScreenState extends State<ConsultarAtletaScreen> {
   }
 
   Future<void> _fetchReports() async {
-    const String url = 'http://192.168.1.118:3000/relatorios';
+    const String url = 'https://pi4-hdnd.onrender.com/relatorios';
     try {
       final response = await http.get(Uri.parse(url));
 
