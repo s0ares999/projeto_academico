@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:timeago/timeago.dart' as timeago;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class NotificacoesScreen extends StatefulWidget {
   final String userId;
@@ -25,6 +26,8 @@ class _NotificacoesScreenState extends State<NotificacoesScreen> {
   }
 
   Future<void> fetchNotifications() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? userId = prefs.getString('userId');
     final url = 'http://192.168.1.118:3000/Notificacao/utilizador/1';
 
     try {
