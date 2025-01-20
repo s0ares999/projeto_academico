@@ -1,9 +1,56 @@
 // ignore_for_file: prefer_const_constructors
 
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:timeago/timeago.dart' as timeago;
 
-class NotificacoesScreen extends StatelessWidget {
-  const NotificacoesScreen({super.key});
+class NotificacoesScreen extends StatefulWidget {
+  final String userId;
+
+  const NotificacoesScreen({super.key, required this.userId});
+
+  @override
+  State<NotificacoesScreen> createState() => _NotificacoesScreenState();
+}
+
+class _NotificacoesScreenState extends State<NotificacoesScreen> {
+  List<dynamic> notifications = [];
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchNotifications();
+  }
+
+  Future<void> fetchNotifications() async {
+    final url = 'http://192.168.1.118:3000/Notificacao/utilizador/1';
+
+    try {
+      final response = await http.get(Uri.parse(url));
+
+      print('Status Code: ${response.statusCode}');
+      print('Response Body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        setState(() {
+          notifications = jsonDecode(response.body);
+          isLoading = false;
+        });
+      } else {
+        throw Exception('Falha ao carregar notificações');
+      }
+    } catch (error) {
+      print('Erro: $error');
+      setState(() {
+        isLoading = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Erro: $error')),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -15,7 +62,9 @@ class NotificacoesScreen extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () {
-              // Apagar todas as notificações
+              setState(() {
+                notifications.clear();
+              });
             },
             child: Text(
               'Apagar tudo',
@@ -24,46 +73,32 @@ class NotificacoesScreen extends StatelessWidget {
           ),
         ],
       ),
-      body: ListView(
-        padding: EdgeInsets.all(16),
-        children: [
-          NotificationCard(
-            title: 'Relatório submetido',
-            timeAgo: 'Há 10 minutos',
-            description: 'Inês Fernandes submeteu um novo relatório',
-            actions: [
-              ActionButton(text: 'Ver', color: Colors.orange, onPressed: () {}),
-              ActionButton(text: 'Aprovar', color: Colors.green, onPressed: () {}),
-            ],
-            backgroundColor: Colors.orange.shade50,
-          ),
-          NotificationCard(
-            title: 'Tem um novo jogo',
-            timeAgo: 'Há 2 dias',
-            description: '',
-            actions: [
-              ActionButton(text: 'Ver', color: Colors.orange, onPressed: () {}),
-            ],
-          ),
-          NotificationCard(
-            title: 'Tem validações pendentes',
-            timeAgo: 'Semana passada',
-            description: '',
-            actions: [
-              ActionButton(text: 'Ver', color: Colors.orange, onPressed: () {}),
-            ],
-          ),
-          NotificationCard(
-            title: 'Pedido de alteração de palavra-passe',
-            timeAgo: 'Semana passada',
-            description: 'Utilizador Maria pediu para alterar a palavra-passe',
-            actions: [
-              ActionButton(text: 'Aprovar', color: Colors.green, onPressed: () {}),
-              ActionButton(text: 'Recusar', color: Colors.red, onPressed: () {}),
-            ],
-          ),
-        ],
-      ),
+      body: isLoading
+          ? Center(child: CircularProgressIndicator())
+          : notifications.isEmpty
+              ? Center(child: Text('Sem notificações'))
+              : ListView.builder(
+                  padding: EdgeInsets.all(16),
+                  itemCount: notifications.length,
+                  itemBuilder: (context, index) {
+                    final notification = notifications[index];
+                    return NotificationCard(
+                      title: notification['tipo'] ?? 'Sem título',
+                      timeAgo: timeago.format(DateTime.parse(notification['createdAt'])),
+                      description: notification['mensagem'] ?? 'Sem mensagem',
+                      actions: [
+                        ActionButton(
+                          text: 'Ver',
+                          color: Colors.orange,
+                          onPressed: () {
+                            // Implementar ação
+                          },
+                        ),
+                      ],
+                      backgroundColor: Colors.orange.shade50,
+                    );
+                  },
+                ),
     );
   }
 }

@@ -10,6 +10,7 @@ import 'consultaratleta_screen.dart';
 import 'criarrelatorio_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   runApp(const MyApp());
@@ -48,6 +49,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
+  String _userName = '';  // Variável para armazenar o nome do usuário
   List<dynamic>? nextMatch; // Lista para armazenar todas as partidas
 
   final List<Widget> _screens = [];
@@ -55,7 +57,37 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
+    _fetchUserName();  // Chama a função para buscar o nome do usuário
     _fetchMatches(); // Chama a função para carregar as partidas
+  }
+
+  // Função para buscar o nome do usuário
+  Future<void> _fetchUserName() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? userId = prefs.getString('userId');
+    if (userId != null) {
+      try {
+        final response = await http.get(
+          Uri.parse('http://192.168.1.118:3000/utilizadores/$userId'),
+        );
+
+        if (response.statusCode == 200) {
+          final Map<String, dynamic> data = json.decode(response.body);
+          setState(() {
+            _userName = data['nome'] ?? 'Nome não encontrado'; // Supondo que a resposta contenha o campo 'nome'
+          });
+        } else {
+          setState(() {
+            _userName = 'Nome não disponível';
+          });
+        }
+      } catch (e) {
+        setState(() {
+          _userName = 'Erro ao buscar nome';
+        });
+        print('Erro ao buscar nome do usuário: $e');
+      }
+    }
   }
 
   Future<void> _fetchMatches() async {
@@ -67,7 +99,7 @@ class _HomeScreenState extends State<HomeScreen> {
         final List<dynamic> data = json.decode(response.body);
         print('Resposta da API: $data');
 
-        if (data!=[]) {
+        if (data != []) {
           setState(() {
             nextMatch = data.map((match) {
               print(
@@ -130,7 +162,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'Pedro',
+                    _userName.isEmpty ? 'Carregando...' : _userName,  // Exibe o nome ou 'Carregando...'
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 20,
@@ -141,13 +173,11 @@ class _HomeScreenState extends State<HomeScreen> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       IconButton(
-                        icon: Icon(Icons.notifications,
-                            color: Colors.white, size: 20),
+                        icon: Icon(Icons.notifications, color: Colors.white, size: 20),
                         onPressed: () {
                           Navigator.push(
                             context,
-                            MaterialPageRoute(
-                                builder: (context) => NotificacoesScreen()),
+                            MaterialPageRoute(builder: (context) => NotificacoesScreen(userId: 'userId')),
                           );
                         },
                       ),
@@ -156,8 +186,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         onPressed: () {
                           Navigator.pushReplacement(
                             context,
-                            MaterialPageRoute(
-                                builder: (context) => LoginScreen()),
+                            MaterialPageRoute(builder: (context) => LoginScreen()),
                           );
                         },
                       ),
@@ -372,6 +401,8 @@ class HomePageContent extends StatelessWidget {
                     ),
                   ),
           ),
+
+
           SizedBox(height: 24),
           ElevatedButton(
             onPressed: () {

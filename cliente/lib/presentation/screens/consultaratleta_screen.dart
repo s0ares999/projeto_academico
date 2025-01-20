@@ -25,7 +25,7 @@ class _ConsultarAtletaScreenState extends State<ConsultarAtletaScreen> {
   }
 
   Future<void> _fetchAthletes() async {
-    const String url = 'http://192.168.8.135:3000/atletas';
+    const String url = 'http://192.168.1.118:3000/atletas';
     try {
       final response = await http.get(Uri.parse(url));
 
@@ -49,7 +49,7 @@ class _ConsultarAtletaScreenState extends State<ConsultarAtletaScreen> {
   }
 
   Future<void> _fetchReports() async {
-    const String url = 'http://192.168.8.135:3000/relatorios';
+    const String url = 'http://192.168.1.118:3000/relatorios';
     try {
       final response = await http.get(Uri.parse(url));
 
@@ -335,10 +335,11 @@ class _ConsultarAtletaScreenState extends State<ConsultarAtletaScreen> {
                       ),
                     ],
                   ),
+
                   child: ListTile(
                     title: Text(athlete['nome']),
                     subtitle: Text(
-                      'Clube: ${athlete['clube']}\nPosição: ${athlete['posicao']}',
+                      'Clube: ${athlete['clube']}\nPosição: ${athlete['posicao']}\nAno: ${athlete['ano']}',
                     ),
                     trailing: Row(
                       mainAxisSize: MainAxisSize.min,

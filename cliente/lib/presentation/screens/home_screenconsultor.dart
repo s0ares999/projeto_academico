@@ -57,7 +57,7 @@ class _HomeScreenConsultorState extends State<HomeScreenConsultor> {
   Future<void> _fetchNextMatch() async {
     try {
       final response =
-          await http.get(Uri.parse('http://192.168.8.135:3000/partidas'));
+          await http.get(Uri.parse('http://192.168.1.118:3000/partidas'));
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
@@ -114,7 +114,7 @@ class _HomeScreenConsultorState extends State<HomeScreenConsultor> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'Rui',
+                    'Hiago Freitas',
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 20,
@@ -131,7 +131,7 @@ class _HomeScreenConsultorState extends State<HomeScreenConsultor> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => NotificacoesScreen(),
+                              builder: (context) => NotificacoesScreen(userId: 'userId'),
                             ),
                           );
                         },

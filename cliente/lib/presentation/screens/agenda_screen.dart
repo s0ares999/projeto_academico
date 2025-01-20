@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
+import 'package:pi4_academico/presentation/screens/detalhespartida_screen.dart';
+
 class AgendaScreen extends StatefulWidget {
   @override
   _AgendaScreenState createState() => _AgendaScreenState();
@@ -18,7 +20,7 @@ class _AgendaScreenState extends State<AgendaScreen> {
 
   // Função para carregar as partidas da API
   Future<void> _carregarPartidas() async {
-    final response = await http.get(Uri.parse('http://192.168.8.135:3000/partidas'));
+    final response = await http.get(Uri.parse('http://192.168.1.118:3000/partidas'));
 
     if (response.statusCode == 200) {
       setState(() {
@@ -44,14 +46,42 @@ class _AgendaScreenState extends State<AgendaScreen> {
                 var hora = partida['hora'];
                 var local = partida['local'];
 
-                return Card(
+                return Container(
                   margin: EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.white, // Fundo branco
+                    borderRadius: BorderRadius.circular(12), // Bordas arredondadas
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.1), // Cor da sombra
+                        spreadRadius: 2, // Propaga a sombra
+                        blurRadius: 5, // Intensidade da sombra
+                        offset: Offset(0, 2), // Posição da sombra
+                      ),
+                    ],
+                  ),
                   child: ListTile(
-                    title: Text('$timeMandante vs $timeVisitante'),
-                    subtitle: Text('Data: $data, Hora: $hora  Local: $local'),
+                    title: Text(
+                      '$timeMandante vs $timeVisitante',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SizedBox(height: 8), // Espaçamento entre o título e os dados
+                        Text('Data: $data'),
+                        Text('Hora: $hora'),
+                        Text('Local: $local'),
+                      ],
+                    ),
                     isThreeLine: true,
                     onTap: () {
-                      // Ação ao clicar em uma partida (pode ser detalhamento ou outra ação)
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => DetalhesPartidaScreen(partida: partida),
+                        ),
+                      );
                     },
                   ),
                 );

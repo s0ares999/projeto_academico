@@ -33,7 +33,7 @@ class _CriarRelatorioScreenState extends State<CriarRelatorioScreen> {
   }
 
   Future<void> _carregarAtletas() async {
-    const String urlAtletas = 'http://192.168.8.135:3000/atletas';
+    const String urlAtletas = 'http://192.168.1.118:3000/atletas';
     try {
       final response = await http.get(Uri.parse(urlAtletas));
       if (response.statusCode == 200) {
@@ -76,7 +76,7 @@ class _CriarRelatorioScreenState extends State<CriarRelatorioScreen> {
   }
 
   Future<void> _criarRelatorio() async {
-    const String urlRelatorio = 'http://192.168.8.135:3000/relatorios';
+    const String urlRelatorio = 'http://192.168.1.118:3000/relatorios';
 
     try {
       setState(() {
@@ -206,7 +206,7 @@ class _CriarRelatorioScreenState extends State<CriarRelatorioScreen> {
             buildSection('Morfologia', 3, morfologiaSelecionada,
                 (value) => setState(() => morfologiaSelecionada = value),
                 customOptions: ['ectomorfo', 'mesomorfo', 'endomorfo']),
-            buildSection('Rating Final', 4, ratingFinalSelecionado,
+            buildSection('Rating Final', 5, ratingFinalSelecionado,
                 (value) => setState(() => ratingFinalSelecionado = value)),
             const SizedBox(height: 16),
             TextField(

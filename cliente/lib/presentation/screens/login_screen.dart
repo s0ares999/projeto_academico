@@ -33,7 +33,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
     try {
       final response = await http.post(
-        Uri.parse('http://192.168.8.135:3000/auth/login'),
+        Uri.parse('http://192.168.1.118:3000/auth/login'),
         headers: <String, String>{
           'Content-Type': 'application/json',
         },
@@ -43,7 +43,7 @@ class _LoginScreenState extends State<LoginScreen> {
         }),
       );
 
-      print("Request URL: ${Uri.parse('http://192.168.8.135:3000/auth/login')}");
+      print("Request URL: ${Uri.parse('http://192.168.1.118:3000/auth/login')}");
       print("Response Status: ${response.statusCode}");
       print('Response Body: ${response.body}');
 
@@ -64,11 +64,13 @@ class _LoginScreenState extends State<LoginScreen> {
         prefs.setString('token', token);
         prefs.setString('userId', userId);
         prefs.setString('userRole', userRole);
+        
 
         // Verificar e exibir os dados armazenados para depuração
         print('Token: $token');
         print('User Id: $userId');
         print('User Role: $userRole');
+
 
         // Navegar para a tela correspondente ao papel do usuário
         try {

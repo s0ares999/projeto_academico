@@ -29,13 +29,9 @@ class _CriarAtletaScreenState extends State<CriarAtletaScreen> {
   final List<String> _posicoes = [
     'Guarda-Redes',
     'Defesa Central',
-    'Lateral Esquerdo',
-    'Lateral Direito',
-    'Médio Central',
-    'Médio Ofensivo',
-    'Médio Defensivo',
-    'Extremo Direito',
-    'Extremo Esquerdo',
+    'Defesa Esquerda',
+    'Defesa Direita',
+    'Médio',
     'Atacante',
   ];
 
@@ -46,7 +42,7 @@ class _CriarAtletaScreenState extends State<CriarAtletaScreen> {
   }
 
   Future<void> _carregarClubes() async {
-    const String url = 'http://192.168.8.135:3000/times';
+    const String url = 'http://192.168.1.118:3000/times';
     print('Iniciando o carregamento dos clubes...');
     try {
       final response = await http.get(Uri.parse(url));
@@ -69,7 +65,7 @@ class _CriarAtletaScreenState extends State<CriarAtletaScreen> {
   }
 
   Future<void> _criarAtleta() async {
-    const String url = 'http://192.168.8.135:3000/atletas';
+    const String url = 'http://192.168.1.118:3000/atletas';
     print('Iniciando a criação do atleta...');
 
     if (_nomeController.text.trim().isEmpty ||
