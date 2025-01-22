@@ -24,6 +24,8 @@ class _AgendaScreenState extends State<AgendaScreen> {
       SharedPreferences prefs = await SharedPreferences.getInstance();
   String? userId = prefs.getString('userId');
     final response = await http.get(Uri.parse('https://pi4-hdnd.onrender.com/partidas/atribuidas/$userId'));
+    print('Status Code: ${response.statusCode}');
+    print('Response Body: ${response.body}');
 
     if (response.statusCode == 200) {
       setState(() {
