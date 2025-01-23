@@ -43,7 +43,8 @@ class _LoginScreenState extends State<LoginScreen> {
         }),
       );
 
-      print("Request URL: ${Uri.parse('https://pi4-hdnd.onrender.com/auth/login')}");
+      print(
+          "Request URL: ${Uri.parse('https://pi4-hdnd.onrender.com/auth/login')}");
       print("Response Status: ${response.statusCode}");
       print('Response Body: ${response.body}');
 
@@ -51,7 +52,8 @@ class _LoginScreenState extends State<LoginScreen> {
       if (response.statusCode == 200) {
         final Map<String, dynamic> responseData = jsonDecode(response.body);
         final String token = responseData['token'];
-        final String userId = responseData['id'].toString(); // Converte para String
+        final String userId =
+            responseData['id'].toString(); // Converte para String
         final String userRole = responseData['role'];
 
         // Limpar dados de login anteriores
@@ -64,57 +66,84 @@ class _LoginScreenState extends State<LoginScreen> {
         prefs.setString('token', token);
         prefs.setString('userId', userId);
         prefs.setString('userRole', userRole);
-        
 
         // Verificar e exibir os dados armazenados para depuração
         print('Token: $token');
         print('User Id: $userId');
         print('User Role: $userRole');
 
-
         // Navegar para a tela correspondente ao papel do usuário
-        try {
-          if (userRole == 'Admin' || userRole == 'Scout') {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => const HomeScreen()),
-            );
-          } else if (userRole == 'Consultor') {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => const HomeScreenConsultor()),
-            );
-          }
-        } catch (e) {
-          print("Erro ao navegar: $e");
-          showDialog(
-            context: context,
-            builder: (context) {
-              return AlertDialog(
-                title: const Text('Erro ao navegar'),
-                content: Text('Erro ao navegar para a próxima tela: $e'),
-                actions: [
-                  TextButton(
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
-                    child: const Text('OK'),
-                  ),
-                ],
+        if (mounted) {
+          try {
+            if (userRole == 'Admin' || userRole == 'Scout') {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => const HomeScreen()),
               );
-            },
-          );
-        }
-      } else {
-        final Map<String, dynamic> responseData = jsonDecode(response.body);
-        String errorMessage = responseData['message'] ?? 'Nome de utilizador ou palavra-passe incorretos';
+            } else if (userRole == 'Consultor') {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => const HomeScreenConsultor()),
+              );
+            }
+          } catch (e) {
+            print("Erro ao navegar: $e");
+            if (mounted) {
+              showDialog(
+                context: context,
+                builder: (context) {
+                  return AlertDialog(
+                    title: const Text('Erro ao navegar'),
+                    content: Text('Erro ao navegar para a próxima tela: $e'),
+                    actions: [
+                      TextButton(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                        child: const Text('OK'),
+                      ),
+                    ],
+                  );
+                },
+              );
+            }
+          }
+        } else {
+          final Map<String, dynamic> responseData = jsonDecode(response.body);
+          String errorMessage = responseData['message'] ??
+              'Nome de utilizador ou palavra-passe incorretos';
 
-        // Exibe o erro caso o login falhe
+          // Exibe o erro caso o login falhe
+          if (mounted)
+            showDialog(
+              context: context,
+              builder: (context) {
+                return AlertDialog(
+                  title: Text(errorMessage),
+                  actions: [
+                    TextButton(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                      child: const Text('OK'),
+                    ),
+                  ],
+                );
+              },
+            );
+        }
+      }
+    } catch (error) {
+      // Erro de conexão ou outro erro
+      print("Erro de conexão ou outro erro: $error");
+      if (mounted) {
         showDialog(
           context: context,
           builder: (context) {
             return AlertDialog(
-              title: Text(errorMessage),
+              title: const Text('Erro de conexão'),
+              content: const Text('Não foi possível conectar ao servidor.'),
               actions: [
                 TextButton(
                   onPressed: () {
@@ -127,26 +156,6 @@ class _LoginScreenState extends State<LoginScreen> {
           },
         );
       }
-    } catch (error) {
-      // Erro de conexão ou outro erro
-      print("Erro de conexão ou outro erro: $error");
-      showDialog(
-        context: context,
-        builder: (context) {
-          return AlertDialog(
-            title: const Text('Erro de conexão'),
-            content: const Text('Não foi possível conectar ao servidor.'),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                child: const Text('OK'),
-              ),
-            ],
-          );
-        },
-      );
     }
   }
 
@@ -169,7 +178,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 Center(
                   child: Image.asset(
                     'assets/images/logoacademico.png',
-                    width: 100,  // Ajuste o tamanho conforme necessário
+                    width: 100, // Ajuste o tamanho conforme necessário
                     height: 100,
                   ),
                 ),
@@ -188,10 +197,12 @@ class _LoginScreenState extends State<LoginScreen> {
                   decoration: const InputDecoration(
                     hintText: 'Nome de utilizador',
                     enabledBorder: UnderlineInputBorder(
-                      borderSide: BorderSide(color: Color.fromARGB(218, 180, 178, 178)),
+                      borderSide:
+                          BorderSide(color: Color.fromARGB(218, 180, 178, 178)),
                     ),
                     focusedBorder: UnderlineInputBorder(
-                      borderSide: BorderSide(color: Color.fromARGB(255, 237, 172, 43)),
+                      borderSide:
+                          BorderSide(color: Color.fromARGB(255, 237, 172, 43)),
                     ),
                   ),
                   validator: (value) {
@@ -209,7 +220,9 @@ class _LoginScreenState extends State<LoginScreen> {
                     hintText: 'Palavra-passe',
                     suffixIcon: IconButton(
                       icon: Icon(
-                        _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
+                        _isPasswordVisible
+                            ? Icons.visibility
+                            : Icons.visibility_off,
                       ),
                       onPressed: () {
                         setState(() {
@@ -218,10 +231,12 @@ class _LoginScreenState extends State<LoginScreen> {
                       },
                     ),
                     enabledBorder: const UnderlineInputBorder(
-                      borderSide: BorderSide(color: Color.fromARGB(218, 180, 178, 178)),
+                      borderSide:
+                          BorderSide(color: Color.fromARGB(218, 180, 178, 178)),
                     ),
                     focusedBorder: const UnderlineInputBorder(
-                      borderSide: BorderSide(color: Color.fromARGB(255, 237, 172, 43)),
+                      borderSide:
+                          BorderSide(color: Color.fromARGB(255, 237, 172, 43)),
                     ),
                   ),
                   validator: (value) {
@@ -234,7 +249,8 @@ class _LoginScreenState extends State<LoginScreen> {
                 const SizedBox(height: 20),
                 Center(
                   child: SizedBox(
-                    width: MediaQuery.of(context).size.width * 0.8, // 80% da largura da tela
+                    width: MediaQuery.of(context).size.width *
+                        0.8, // 80% da largura da tela
                     child: ElevatedButton(
                       onPressed: () {
                         if (_formKey.currentState!.validate()) {
@@ -242,14 +258,16 @@ class _LoginScreenState extends State<LoginScreen> {
                         }
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color.fromARGB(218, 210, 210, 210),
+                        backgroundColor:
+                            const Color.fromARGB(218, 210, 210, 210),
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         textStyle: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      child: const Text('Entrar', style: TextStyle(color: Colors.black)),
+                      child: const Text('Entrar',
+                          style: TextStyle(color: Colors.black)),
                     ),
                   ),
                 ),

@@ -367,6 +367,8 @@ class DetalhesAtletaScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Colors.black,
+                iconTheme: IconThemeData(color: Colors.white),
         title: Text(athlete['nome']),
       ),
       body: Padding(

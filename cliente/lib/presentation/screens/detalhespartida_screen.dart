@@ -19,6 +19,7 @@ class DetalhesPartidaScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.black,
+        iconTheme: IconThemeData(color: Colors.white),
         title: Text('Detalhes da Partida'),
       ),
       body: Padding(

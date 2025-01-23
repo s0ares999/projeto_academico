@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:pi4_academico/presentation/screens/home_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class CriarRelatorioScreen extends StatefulWidget {
@@ -79,16 +80,20 @@ class _CriarRelatorioScreenState extends State<CriarRelatorioScreen> {
     const String urlRelatorio = 'https://pi4-hdnd.onrender.com/relatorios';
 
     try {
-      setState(() {
-        _criandoRelatorio = true;
-      });
-
+      if (mounted) {
+        setState(() {
+          _criandoRelatorio = true;
+        });
+      }
       final token = await _obterToken();
       final userId = await _obterUserId(token);
 
       if (userId == null) {
-        _showErrorDialog('Erro: Utilizador não autenticado ou token inválido.');
-        return;
+        if (mounted) {
+          _showErrorDialog(
+              'Erro: Utilizador não autenticado ou token inválido.');
+          return;
+        }
       }
 
       final Map<String, dynamic> dadosRelatorio = {
@@ -126,7 +131,9 @@ class _CriarRelatorioScreenState extends State<CriarRelatorioScreen> {
       _showErrorDialog('Erro de conexão: ${e.toString()}');
     } finally {
       setState(() {
-        _criandoRelatorio = false;
+        if (mounted) {
+          _criandoRelatorio = false;
+        }
       });
     }
   }
@@ -152,10 +159,19 @@ class _CriarRelatorioScreenState extends State<CriarRelatorioScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Sucesso'),
-        content: Text(message),
+        content: Text(
+            'Relatorio criado com sucesso! Ele está pendente de aprovação.'),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () {
+              // Fecha o diálogo
+              Navigator.pop(context);
+              // Navega de volta para a HomePage
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => const HomeScreen()),
+              );
+            },
             child: const Text('OK'),
           ),
         ],
