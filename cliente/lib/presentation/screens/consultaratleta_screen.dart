@@ -16,6 +16,8 @@ class _ConsultarAtletaScreenState extends State<ConsultarAtletaScreen> {
   int selectedFilter = 0;
   int selectedRating = 3;
   String selectedPosition = '';
+  String searchQuery = '';
+  bool isAscending = true;
 
   @override
   void initState() {
@@ -24,56 +26,64 @@ class _ConsultarAtletaScreenState extends State<ConsultarAtletaScreen> {
     _fetchReports();
   }
 
-Future<void> _fetchAthletes() async {
-  const String url = 'https://pi4-hdnd.onrender.com/atletas';
-  try {
-    final response = await http.get(Uri.parse(url));
+  Future<void> _fetchAthletes() async {
+    const String url = 'https://pi4-hdnd.onrender.com/atletas';
+    try {
+      final response = await http.get(Uri.parse(url));
 
-    if (response.statusCode == 200) {
-      final List<dynamic> decodedData = json.decode(response.body);
-      if (mounted) {
-        setState(() {
-          athletes = List<Map<String, dynamic>>.from(decodedData);
-        });
+      if (response.statusCode == 200) {
+        final List<dynamic> decodedData = json.decode(response.body);
+        if (mounted) {
+          setState(() {
+            athletes = List<Map<String, dynamic>>.from(decodedData.map((atleta) {
+              return {
+                'id': atleta['id'] ?? 0,
+                'nome': atleta['nome'] ?? 'Nome não disponível',
+                'clube': atleta['clube'] ?? 'Clube não disponível',
+                'posicao': atleta['posicao'] ?? 'Posição não disponível',
+                'ano': atleta['ano'] ?? 0,
+              };
+            }));
+          });
+        }
+      } else {
+        if (mounted) {
+          _showErrorDialog(
+              'Erro ao carregar atletas. Código: ${response.statusCode}');
+        }
       }
-    } else {
+    } catch (e) {
       if (mounted) {
-        _showErrorDialog(
-            'Erro ao carregar atletas. Código: ${response.statusCode}');
+        _showErrorDialog('Erro de conexão: ${e.toString()}');
       }
-    }
-  } catch (e) {
-    if (mounted) {
-      _showErrorDialog('Erro de conexão: ${e.toString()}');
     }
   }
-}
 
-Future<void> _fetchReports() async {
-  const String url = 'https://pi4-hdnd.onrender.com/relatorios';
-  try {
-    final response = await http.get(Uri.parse(url));
+  Future<void> _fetchReports() async {
+    const String url = 'https://pi4-hdnd.onrender.com/relatorios';
+    try {
+      final response = await http.get(Uri.parse(url));
 
-    if (response.statusCode == 200) {
-      final List<dynamic> decodedData = json.decode(response.body);
-      if (mounted) {
-        setState(() {
-          reports = List<Map<String, dynamic>>.from(decodedData);
-        });
+      if (response.statusCode == 200) {
+        final List<dynamic> decodedData = json.decode(response.body);
+        if (mounted) {
+          setState(() {
+            reports = List<Map<String, dynamic>>.from(decodedData);
+          });
+        }
+        print('Relatórios recebidos: ${response.body}'); // Depuração
+      } else {
+        if (mounted) {
+          _showErrorDialog(
+              'Erro ao carregar relatórios. Código: ${response.statusCode}');
+        }
       }
-    } else {
+    } catch (e) {
       if (mounted) {
-        _showErrorDialog(
-            'Erro ao carregar relatórios. Código: ${response.statusCode}');
+        _showErrorDialog('Erro de conexão: ${e.toString()}');
       }
-    }
-  } catch (e) {
-    if (mounted) {
-      _showErrorDialog('Erro de conexão: ${e.toString()}');
     }
   }
-}
-
 
   void _showErrorDialog(String message) {
     showDialog(
@@ -95,21 +105,115 @@ Future<void> _fetchReports() async {
 
   int _getAthleteRating(String athleteId) {
     final report = reports.firstWhere(
-      (report) => report['atleta_id'] == athleteId,
+      (report) => report['atletaId'].toString() == athleteId,
       orElse: () => {},
     );
-    return report.isNotEmpty ? report['ratingFinalSelecionado'] ?? 0 : 0;
+    return report.isNotEmpty ? report['ratingFinal'] ?? 0 : 0;
+  }
+
+  List<Map<String, dynamic>> _filterAthletes() {
+    List<Map<String, dynamic>> filteredAthletes = athletes;
+
+    // Filtro por pesquisa
+    if (searchQuery.isNotEmpty) {
+      filteredAthletes = filteredAthletes.where((athlete) {
+        return athlete['nome']
+            .toLowerCase()
+            .contains(searchQuery.toLowerCase());
+      }).toList();
+    }
+
+    // Filtro por posição
+    if (selectedFilter == 1 && selectedPosition.isNotEmpty) {
+      filteredAthletes = filteredAthletes.where((athlete) {
+        return athlete['posicao'] == selectedPosition;
+      }).toList();
+    }
+
+    // Filtro por rating
+    if (selectedFilter == 3) {
+      filteredAthletes = filteredAthletes.where((athlete) {
+        final athleteRating = _getAthleteRating(athlete['id'].toString());
+        return athleteRating == selectedRating;
+      }).toList();
+    }
+
+    return filteredAthletes;
+  }
+
+  List<Map<String, dynamic>> _sortAthletes(List<Map<String, dynamic>> athletes) {
+    if (selectedFilter == 0) {
+      // Ordenar por ano
+      athletes.sort((a, b) => isAscending
+          ? (a['ano'] ?? 0).compareTo(b['ano'] ?? 0)
+          : (b['ano'] ?? 0).compareTo(a['ano'] ?? 0));
+    } else if (selectedFilter == 2) {
+      // Ordenar por clube
+      athletes.sort((a, b) => isAscending
+          ? (a['clube'] ?? '').compareTo(b['clube'] ?? '')
+          : (b['clube'] ?? '').compareTo(a['clube'] ?? ''));
+    }
+
+    return athletes;
+  }
+
+  void _showPositionModal() {
+    final positions = [
+      'Guarda-Redes',
+      'Defesa Central',
+      'Defesa Esquerda',
+      'Defesa Direita',
+      'Médio',
+      'Atacante',
+    ]; // Exemplo de posições
+
+    showModalBottomSheet(
+      context: context,
+      builder: (context) {
+        return ListView.builder(
+          itemCount: positions.length,
+          itemBuilder: (context, index) {
+            return ListTile(
+              title: Text(positions[index]),
+              onTap: () {
+                setState(() {
+                  selectedPosition = positions[index];
+                });
+                Navigator.pop(context);
+              },
+            );
+          },
+        );
+      },
+    );
+  }
+
+  void _showRatingModal() {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) {
+        return ListView(
+          children: List.generate(5, (index) {
+            final rating = index + 1;
+            return ListTile(
+              title: Text('Rating $rating'),
+              onTap: () {
+                setState(() {
+                  selectedRating = rating;
+                });
+                Navigator.pop(context);
+              },
+            );
+          }),
+        );
+      },
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    List<Map<String, dynamic>> filteredAthletes = athletes;
-
-    if (selectedRating != 3) {
-      filteredAthletes = athletes.where((athlete) {
-        return athlete['rating'] == selectedRating;
-      }).toList();
-    }
+    List<Map<String, dynamic>> filteredAthletes = _filterAthletes();
+    filteredAthletes = _sortAthletes(filteredAthletes);
 
     return Scaffold(
       body: Column(
@@ -117,6 +221,11 @@ Future<void> _fetchReports() async {
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: TextField(
+              onChanged: (value) {
+                setState(() {
+                  searchQuery = value;
+                });
+              },
               decoration: InputDecoration(
                 hintText: 'Pesquisar atleta',
                 prefixIcon: const Icon(Icons.search),
@@ -139,6 +248,13 @@ Future<void> _fetchReports() async {
                   onTap: () {
                     setState(() {
                       selectedFilter = index;
+                      if (index == 1) {
+                        _showPositionModal();
+                      } else if (index == 3) {
+                        _showRatingModal();
+                      } else if (index == 0 || index == 2) {
+                        isAscending = !isAscending;
+                      }
                     });
                   },
                   child: Padding(
@@ -216,7 +332,7 @@ Future<void> _fetchReports() async {
                         MaterialPageRoute(
                           builder: (context) => DetalhesAtletaScreen(
                             athlete: athlete,
-                            reports: [],
+                            reports: reports,
                           ),
                         ),
                       );
@@ -234,8 +350,7 @@ Future<void> _fetchReports() async {
 
 class DetalhesAtletaScreen extends StatelessWidget {
   final Map<String, dynamic> athlete;
-  final List<Map<String, dynamic>>
-      reports; // Recebe os relatórios como parâmetro
+  final List<Map<String, dynamic>> reports;
 
   DetalhesAtletaScreen({
     Key? key,
@@ -245,9 +360,8 @@ class DetalhesAtletaScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Busca o relatório associado ao atleta
     final Map<String, dynamic> athleteReport = reports.firstWhere(
-      (report) => report['atleta_id'] == athlete['id'],
+      (report) => report['atletaId'].toString() == athlete['id'].toString(),
       orElse: () => {},
     );
 
@@ -271,28 +385,20 @@ class DetalhesAtletaScreen extends StatelessWidget {
             Text('Ano: ${athlete['ano']}',
                 style: const TextStyle(fontSize: 16)),
             const Divider(height: 30),
-            ...[
             const Text(
               'Dados do Relatório:',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 10),
-            Text('Técnica: ${athleteReport['tecnica'] ?? ''}'),
-            Text(
-                'Velocidade: ${athleteReport['velocidade'] ?? ''}'),
-            Text(
-                'Atitude Competitiva: ${athleteReport['atitudeCompetitiva'] ?? ''}'),
-            Text(
-                'Inteligência: ${athleteReport['inteligencia'] ?? ''}'),
-            Text('Altura: ${athleteReport['altura'] ?? ''}'),
-            Text(
-                'Morfologia: ${athleteReport['morfologia'] ?? ''}'),
-            Text(
-                'Rating Final: ${athleteReport['ratingFinal'] ?? ''}'),
+            Text('Técnica: ${athleteReport['tecnica'] ?? 'N/A'}'),
+            Text('Velocidade: ${athleteReport['velocidade'] ?? 'N/A'}'),
+            Text('Atitude Competitiva: ${athleteReport['atitudeCompetitiva'] ?? 'N/A'}'),
+            Text('Inteligência: ${athleteReport['inteligencia'] ?? 'N/A'}'),
+            Text('Altura: ${athleteReport['altura'] ?? 'N/A'}'),
+            Text('Morfologia: ${athleteReport['morfologia'] ?? 'N/A'}'),
+            Text('Rating Final: ${athleteReport['ratingFinal'] ?? 'N/A'}'),
             const SizedBox(height: 10),
-            Text(
-                'Comentário: ${athleteReport['comentario'] ?? 'Nenhum comentário.'}'),
-          ],
+            Text('Comentário: ${athleteReport['comentario'] ?? 'Nenhum comentário.'}'),
           ],
         ),
       ),

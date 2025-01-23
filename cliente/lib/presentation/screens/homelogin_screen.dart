@@ -56,16 +56,20 @@ class _HomeLoginScreenState extends State<HomeLoginScreen> {
               ),
               const SizedBox(height: 50),
               ElevatedButton(
-                onPressed: () {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const LoginScreen(),
-                    ),
-                  );
-                },
+                onPressed: selectedValue == 'accept_terms'
+                    ? () {
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const LoginScreen(),
+                          ),
+                        );
+                      }
+                    : null, // Desabilita o botão se o valor não for 'accept_terms'
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.white, 
+                  backgroundColor: selectedValue == 'accept_terms'
+                      ? Colors.white // Cor quando habilitado
+                      : const Color.fromARGB(255, 255, 244, 244), // Cor quando desabilitado
                   padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 20),
                   textStyle: const TextStyle(
                     fontSize: 16,
@@ -75,7 +79,7 @@ class _HomeLoginScreenState extends State<HomeLoginScreen> {
                 child: const Text(
                   'LOGIN',
                   style: TextStyle(
-                    color: Colors.black, 
+                    color: Color.fromARGB(255, 63, 63, 63), 
                   ),
                 ),
               ),
@@ -83,21 +87,21 @@ class _HomeLoginScreenState extends State<HomeLoginScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-               Theme(
-                  data: Theme.of(context).copyWith(
-                    unselectedWidgetColor: Colors.orange, 
+                  Theme(
+                    data: Theme.of(context).copyWith(
+                      unselectedWidgetColor: Colors.orange, 
+                    ),
+                    child: Radio<String>(
+                      value: 'accept_terms',
+                      groupValue: selectedValue,
+                      onChanged: (value) {
+                        setState(() {
+                          selectedValue = value;
+                        });
+                      },
+                      activeColor: Colors.orange, 
+                    ),
                   ),
-                  child: Radio<String>(
-                    value: 'accept_terms',
-                    groupValue: selectedValue,
-                    onChanged: (value) {
-                      setState(() {
-                        selectedValue = value;
-                      });
-                    },
-                    activeColor: Colors.orange, 
-                  ),
-                ),
                   const Text.rich(
                     TextSpan(
                       text: 'Aceito as ',

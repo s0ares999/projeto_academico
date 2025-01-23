@@ -1,12 +1,13 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:pi4_academico/presentation/screens/agenda_screen.dart';
+import 'package:pi4_academico/presentation/screens/agendaconsultor_screen.dart';
 import 'package:pi4_academico/presentation/screens/login_screen.dart';
 import 'package:pi4_academico/presentation/screens/notificacoes_screen.dart';
 import 'package:pi4_academico/theme_notifier.dart';
 import 'consultaratleta_screen.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   runApp(const MyApp());
@@ -23,10 +24,11 @@ class MyApp extends StatelessWidget {
         builder: (context, themeNotifier, _) {
           return MaterialApp(
             debugShowCheckedModeBanner: false,
-            theme: ThemeData.light(),
-            darkTheme: ThemeData.dark(),
-            themeMode:
-                themeNotifier.isDarkMode ? ThemeMode.dark : ThemeMode.light,
+            theme: ThemeData.light(), // Tema claro
+            darkTheme: ThemeData.dark(), // Tema escuro
+            themeMode: themeNotifier.isDarkMode
+                ? ThemeMode.dark
+                : ThemeMode.light, // Altera o tema dinamicamente
             home: const HomeScreenConsultor(),
           );
         },
@@ -44,43 +46,43 @@ class HomeScreenConsultor extends StatefulWidget {
 
 class _HomeScreenConsultorState extends State<HomeScreenConsultor> {
   int _selectedIndex = 0;
-  Map<String, dynamic>? nextMatch;
+  String _userName = ''; // Variável para armazenar o nome do usuário
 
   final List<Widget> _screens = [];
 
   @override
   void initState() {
     super.initState();
-    _fetchNextMatch();
+    _fetchUserName(); // Chama a função para buscar o nome do usuário
   }
 
-  Future<void> _fetchNextMatch() async {
-    try {
-      final response =
-          await http.get(Uri.parse('https://pi4-hdnd.onrender.com/partidas'));
+  // Função para buscar o nome do usuário
+  Future<void> _fetchUserName() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? userId = prefs.getString('userId');
+    if (userId != null) {
+      try {
+        final response = await http.get(
+          Uri.parse('https://pi4-hdnd.onrender.com/utilizadores/$userId'),
+        );
 
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-
-        if (data['partidas'] != null && data['partidas'].isNotEmpty) {
-          var lastMatch = (data['partidas'] as List).last;
-
+        if (response.statusCode == 200) {
+          final Map<String, dynamic> data = json.decode(response.body);
           setState(() {
-            nextMatch = lastMatch;
+            _userName = data['nome'] ??
+                'Nome não encontrado'; // Supondo que a resposta contenha o campo 'nome'
           });
         } else {
           setState(() {
-            nextMatch = null;
+            _userName = 'Nome não disponível';
           });
         }
-      } else {
-        throw Exception(
-            'Erro ao carregar partida, código: ${response.statusCode}');
+      } catch (e) {
+        setState(() {
+          _userName = 'Erro ao buscar nome';
+        });
+        print('Erro ao buscar nome do usuário: $e');
       }
-    } catch (e) {
-      setState(() {
-        nextMatch = null;
-      });
     }
   }
 
@@ -93,9 +95,9 @@ class _HomeScreenConsultorState extends State<HomeScreenConsultor> {
   @override
   Widget build(BuildContext context) {
     _screens.addAll([
-      HomePageContent(nextMatch: nextMatch),
-      AgendaScreen(),
-      ConsultarAtletaScreen(),
+      HomePageContent(),
+      AgendaConsultorScreen(),
+      ConsultarAtletaScreen(), // Removido CriarAtletaScreen
     ]);
 
     return Scaffold(
@@ -114,7 +116,9 @@ class _HomeScreenConsultorState extends State<HomeScreenConsultor> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'Hiago Freitas',
+                    _userName.isEmpty
+                        ? 'Carregando...'
+                        : _userName, // Exibe o nome ou 'Carregando...'
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 20,
@@ -131,8 +135,8 @@ class _HomeScreenConsultorState extends State<HomeScreenConsultor> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => NotificacoesScreen(userId: 'userId'),
-                            ),
+                                builder: (context) =>
+                                    NotificacoesScreen(userId: 'userId')),
                           );
                         },
                       ),
@@ -145,6 +149,7 @@ class _HomeScreenConsultorState extends State<HomeScreenConsultor> {
                           size: 20,
                         ),
                         onPressed: () {
+                          // Alterna entre os modos de tema
                           context.read<ThemeNotifier>().toggleTheme();
                         },
                       ),
@@ -160,59 +165,29 @@ class _HomeScreenConsultorState extends State<HomeScreenConsultor> {
         ],
       ),
       bottomNavigationBar: Padding(
-        padding: const EdgeInsets.only(bottom: 0),
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            Container(
-              height: 50,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.withOpacity(0.2),
-                    spreadRadius: 3,
-                    blurRadius: 6,
-                  ),
-                ],
+        padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 3),
+        child: Container(
+          height: 60,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withOpacity(0.2),
+                spreadRadius: 3,
+                blurRadius: 6,
               ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  _buildNavItem(Icons.home, "Início", 0),
-                  _buildNavItem(Icons.calendar_today, "Agenda", 1),
-                  SizedBox(width: 50), // Espaço reservado para o botão central
-                  _buildNavItem(Icons.people, "Atletas", 2),
-                  _buildNavItem(
-                      Icons.logout, "Logout", 3), // Botão de logout adicionado
-                ],
-              ),
-            ),
-            Positioned(
-              bottom: 0,
-              child: GestureDetector(
-                onTap: () => _onItemTapped(0),
-                child: Container(
-                  padding: EdgeInsets.all(
-                      4), // Reduzido o padding para dar mais espaço à imagem
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Colors.white,
-                    boxShadow: [
-                      BoxShadow(color: Colors.grey, blurRadius: 4),
-                    ],
-                  ),
-                  child: Image.asset(
-                    'assets/images/logoacademico.png',
-                    height:
-                        42, // Ajustado para um valor menor, para evitar que o logo fique cortado
-                    fit: BoxFit
-                        .contain, // Garante que a imagem se ajuste ao tamanho do contêiner
-                  ),
-                ),
-              ),
-            ),
-          ],
+            ],
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              _buildNavItem(Icons.home, "Início", 0),
+              _buildNavItem(Icons.calendar_today, "Agenda", 1),
+              _buildCentralLogo(), // Logo central
+              _buildNavItem(Icons.people, "Atletas", 2),
+              _buildNavItem(Icons.logout, "Logout", 3), // Botão de logout
+            ],
+          ),
         ),
       ),
     );
@@ -222,11 +197,10 @@ class _HomeScreenConsultorState extends State<HomeScreenConsultor> {
     return GestureDetector(
       onTap: () {
         if (label == "Logout") {
+          // Lógica para logout
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(
-              builder: (context) => LoginScreen(),
-            ),
+            MaterialPageRoute(builder: (context) => LoginScreen()),
           );
         } else {
           _onItemTapped(index);
@@ -251,12 +225,31 @@ class _HomeScreenConsultorState extends State<HomeScreenConsultor> {
       ),
     );
   }
+
+  Widget _buildCentralLogo() {
+    return GestureDetector(
+      onTap: () => _onItemTapped(0), // Volta para a tela inicial ao clicar
+      child: Container(
+        margin: EdgeInsets.only(bottom: 1),
+        padding: EdgeInsets.all(6),
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: Colors.white,
+          boxShadow: [
+            BoxShadow(color: Colors.grey, blurRadius: 4),
+          ],
+        ),
+        child: Image.asset(
+          'assets/images/logoacademico.png', // Caminho da imagem do logo
+          height: 50,
+        ),
+      ),
+    );
+  }
 }
 
 class HomePageContent extends StatelessWidget {
-  final Map<String, dynamic>? nextMatch;
-
-  const HomePageContent({super.key, this.nextMatch});
+  const HomePageContent({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -265,73 +258,27 @@ class HomePageContent extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          SizedBox(height: 16),
-          Container(
-            padding: EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(12),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.grey.withOpacity(0.6),
-                  spreadRadius: 4,
-                  blurRadius: 6,
-                  offset: Offset(0, 3),
-                ),
-              ],
+          SizedBox(height: 65),
+          // Mensagem de boas-vindas
+          Text(
+            "Bem-vindo ao Viriatus Scouting",
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
             ),
-            child: nextMatch != null
-                ? Column(
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Column(
-                            children: [
-                              Text(
-                                nextMatch!['timeMandante'],
-                                style: TextStyle(
-                                    fontWeight: FontWeight.bold, fontSize: 12),
-                              ),
-                            ],
-                          ),
-                          Column(
-                            children: [
-                              Text(
-                                nextMatch!['hora'],
-                                style: TextStyle(
-                                    color: Colors.orange,
-                                    fontSize: 26,
-                                    fontWeight: FontWeight.bold),
-                              ),
-                              Text(
-                                DateTime.parse(nextMatch!['data'])
-                                    .toLocal()
-                                    .toString()
-                                    .substring(0, 10),
-                                style:
-                                    TextStyle(color: Colors.grey, fontSize: 10),
-                              ),
-                            ],
-                          ),
-                          Column(
-                            children: [
-                              Text(
-                                nextMatch!['timeVisitante'],
-                                style: TextStyle(
-                                    fontWeight: FontWeight.bold, fontSize: 12),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ],
-                  )
-                : Text(
-                    "Nenhum jogo encontrado.",
-                    style: TextStyle(color: Colors.grey),
-                  ),
           ),
+          SizedBox(height: 8),
+          // Subtítulo adicional
+          Text(
+            "Sua plataforma de scouting de futebol",
+            style: TextStyle(
+              fontSize: 16,
+              color: Colors.grey,
+            ),
+          ),
+          SizedBox(height: 16),
+          // Logo
           SizedBox(height: 24),
         ],
       ),

@@ -25,7 +25,7 @@ class _CriarAtletaScreenState extends State<CriarAtletaScreen> {
   String? _clubeIdSelecionado;
   String? _posicaoSelecionada;
   List<Map<String, dynamic>> _clubes = [];
-  
+
   final List<String> _posicoes = [
     'Guarda-Redes',
     'Defesa Central',
@@ -50,17 +50,23 @@ class _CriarAtletaScreenState extends State<CriarAtletaScreen> {
       if (response.statusCode == 200) {
         final List<dynamic> clubesJson = jsonDecode(response.body);
         print('Clubes carregados: $clubesJson');
-        setState(() {
-          _clubes = clubesJson.cast<Map<String, dynamic>>();
-        });
+        if (mounted) {
+          setState(() {
+            _clubes = clubesJson.cast<Map<String, dynamic>>();
+          });
+        }
       } else {
         print('Erro ao carregar clubes. Status: ${response.statusCode}');
-        _showErrorDialog(
-            'Erro ao carregar clubes. Código de status: ${response.statusCode}');
+        if (mounted) {
+          _showErrorDialog(
+              'Erro ao carregar clubes. Código de status: ${response.statusCode}');
+        }
       }
     } catch (e) {
       print('Erro durante a requisição de clubes: $e');
-      _showErrorDialog('Erro de conexão: $e');
+      if (mounted) {
+        _showErrorDialog('Erro de conexão: $e');
+      }
     }
   }
 
@@ -203,9 +209,11 @@ class _CriarAtletaScreenState extends State<CriarAtletaScreen> {
               const SizedBox(height: 10),
               _buildTextField('Link', _linkController),
               const SizedBox(height: 10),
-              _buildTextField('Nome do Agente/Encarregado de Educação', _nomeAgenteController),
+              _buildTextField('Nome do Agente/Encarregado de Educação',
+                  _nomeAgenteController),
               const SizedBox(height: 10),
-              _buildTextField('Contacto do Agente/Encarregado de Educação', _contactoAgenteController),
+              _buildTextField('Contacto do Agente/Encarregado de Educação',
+                  _contactoAgenteController),
               const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: _criarAtleta,
