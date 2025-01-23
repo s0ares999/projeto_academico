@@ -24,43 +24,56 @@ class _ConsultarAtletaScreenState extends State<ConsultarAtletaScreen> {
     _fetchReports();
   }
 
-  Future<void> _fetchAthletes() async {
-    const String url = 'https://pi4-hdnd.onrender.com/atletas';
-    try {
-      final response = await http.get(Uri.parse(url));
+Future<void> _fetchAthletes() async {
+  const String url = 'https://pi4-hdnd.onrender.com/atletas';
+  try {
+    final response = await http.get(Uri.parse(url));
 
-      if (response.statusCode == 200) {
-        final List<dynamic> decodedData = json.decode(response.body);
+    if (response.statusCode == 200) {
+      final List<dynamic> decodedData = json.decode(response.body);
+      if (mounted) {
         setState(() {
           athletes = List<Map<String, dynamic>>.from(decodedData);
         });
-      } else {
+      }
+    } else {
+      if (mounted) {
         _showErrorDialog(
             'Erro ao carregar atletas. Código: ${response.statusCode}');
       }
-    } catch (e) {
+    }
+  } catch (e) {
+    if (mounted) {
       _showErrorDialog('Erro de conexão: ${e.toString()}');
     }
   }
+}
 
-  Future<void> _fetchReports() async {
-    const String url = 'https://pi4-hdnd.onrender.com/relatorios';
-    try {
-      final response = await http.get(Uri.parse(url));
+Future<void> _fetchReports() async {
+  const String url = 'https://pi4-hdnd.onrender.com/relatorios';
+  try {
+    final response = await http.get(Uri.parse(url));
 
-      if (response.statusCode == 200) {
-        final List<dynamic> decodedData = json.decode(response.body);
+    if (response.statusCode == 200) {
+      final List<dynamic> decodedData = json.decode(response.body);
+      if (mounted) {
         setState(() {
           reports = List<Map<String, dynamic>>.from(decodedData);
         });
-      } else {
+      }
+    } else {
+      if (mounted) {
         _showErrorDialog(
             'Erro ao carregar relatórios. Código: ${response.statusCode}');
       }
-    } catch (e) {
+    }
+  } catch (e) {
+    if (mounted) {
       _showErrorDialog('Erro de conexão: ${e.toString()}');
     }
   }
+}
+
 
   void _showErrorDialog(String message) {
     showDialog(
@@ -202,7 +215,8 @@ class _ConsultarAtletaScreenState extends State<ConsultarAtletaScreen> {
                         context,
                         MaterialPageRoute(
                           builder: (context) => DetalhesAtletaScreen(
-                            athlete: athlete, reports: [],
+                            athlete: athlete,
+                            reports: [],
                           ),
                         ),
                       );
@@ -220,20 +234,22 @@ class _ConsultarAtletaScreenState extends State<ConsultarAtletaScreen> {
 
 class DetalhesAtletaScreen extends StatelessWidget {
   final Map<String, dynamic> athlete;
-  final List<Map<String, dynamic>> reports;
+  final List<Map<String, dynamic>>
+      reports; // Recebe os relatórios como parâmetro
 
-  const DetalhesAtletaScreen({
+  DetalhesAtletaScreen({
+    Key? key,
     required this.athlete,
     required this.reports,
-    super.key,
-  });
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    // Filtra os relatórios que pertencem ao atleta
-    final athleteReports = reports.where((report) {
-      return report['atleta_id'] == athlete['id'];
-    }).toList();
+    // Busca o relatório associado ao atleta
+    final Map<String, dynamic> athleteReport = reports.firstWhere(
+      (report) => report['atleta_id'] == athlete['id'],
+      orElse: () => {},
+    );
 
     return Scaffold(
       appBar: AppBar(
@@ -241,48 +257,43 @@ class DetalhesAtletaScreen extends StatelessWidget {
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('Nome: ${athlete['nome']}', style: const TextStyle(fontSize: 18)),
-              const SizedBox(height: 10),
-              Text('Clube: ${athlete['clube']}', style: const TextStyle(fontSize: 16)),
-              const SizedBox(height: 10),
-              Text('Posição: ${athlete['posicao']}', style: const TextStyle(fontSize: 16)),
-              const SizedBox(height: 10),
-              Text('Ano: ${athlete['ano']}', style: const TextStyle(fontSize: 16)),
-              const SizedBox(height: 20),
-              Text('Relatórios:', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-              const SizedBox(height: 10),
-              if (athleteReports.isEmpty)
-                const Text('Nenhum relatório disponível para este atleta.', style: TextStyle(fontSize: 16)),
-              if (athleteReports.isNotEmpty)
-                Column(
-                  children: athleteReports.map((report) {
-                    return Card(
-                      elevation: 4,
-                      margin: const EdgeInsets.symmetric(vertical: 8.0),
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text('Título: ${report['titulo']}', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                            const SizedBox(height: 5),
-                            Text('Data: ${report['data']}', style: const TextStyle(fontSize: 14)),
-                            const SizedBox(height: 5),
-                            Text('Observações: ${report['observacoes']}', style: const TextStyle(fontSize: 14)),
-                            const SizedBox(height: 5),
-                            Text('Rating: ${report['ratingFinalSelecionado']}', style: const TextStyle(fontSize: 14)),
-                          ],
-                        ),
-                      ),
-                    );
-                  }).toList(),
-                ),
-            ],
-          ),
+        child: ListView(
+          children: [
+            Text('Nome: ${athlete['nome']}',
+                style: const TextStyle(fontSize: 18)),
+            const SizedBox(height: 10),
+            Text('Clube: ${athlete['clube']}',
+                style: const TextStyle(fontSize: 16)),
+            const SizedBox(height: 10),
+            Text('Posição: ${athlete['posicao']}',
+                style: const TextStyle(fontSize: 16)),
+            const SizedBox(height: 10),
+            Text('Ano: ${athlete['ano']}',
+                style: const TextStyle(fontSize: 16)),
+            const Divider(height: 30),
+            ...[
+            const Text(
+              'Dados do Relatório:',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 10),
+            Text('Técnica: ${athleteReport['tecnica'] ?? ''}'),
+            Text(
+                'Velocidade: ${athleteReport['velocidade'] ?? ''}'),
+            Text(
+                'Atitude Competitiva: ${athleteReport['atitudeCompetitiva'] ?? ''}'),
+            Text(
+                'Inteligência: ${athleteReport['inteligencia'] ?? ''}'),
+            Text('Altura: ${athleteReport['altura'] ?? ''}'),
+            Text(
+                'Morfologia: ${athleteReport['morfologia'] ?? ''}'),
+            Text(
+                'Rating Final: ${athleteReport['ratingFinal'] ?? ''}'),
+            const SizedBox(height: 10),
+            Text(
+                'Comentário: ${athleteReport['comentario'] ?? 'Nenhum comentário.'}'),
+          ],
+          ],
         ),
       ),
     );
